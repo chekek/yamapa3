@@ -1,582 +1,347 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Яндекс Карты v3 — стенд</title>
-<script src="https://api-maps.yandex.ru/v3/?apikey=e2cf8129-ff43-4729-b542-1591d12b5fef&lang=ru_RU" defer></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Yandex Maps 3.0 Style Tester</title>
+
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: monospace; background: #f5f5f3; display: flex; height: 100vh; overflow: hidden; }
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background: #111;
+    }
 
-.sidebar {
-  width: 280px; flex-shrink: 0;
-  background: #f0efe9;
-  border-right: 1px solid #ddd;
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-.sidebar-head {
-  padding: 12px 14px;
-  border-bottom: 1px solid #ddd;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.sidebar-head h1 { font-size: 13px; font-weight: 600; }
-.badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #d4e8fa; color: #185FA5; font-weight: 600; }
+    #map {
+        width: 100%;
+        height: 100%;
+    }
 
-.tabs { display: flex; border-bottom: 1px solid #ddd; }
-.tab {
-  flex: 1; padding: 8px 4px; font-size: 11px; font-weight: 600;
-  color: #888; background: none; border: none; cursor: pointer;
-  font-family: monospace;
-}
-.tab.active { color: #111; background: #fff; border-bottom: 2px solid #111; }
-.tab:hover:not(.active) { background: #e8e8e4; }
+    .panel {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
 
-.panel { flex: 1; overflow-y: auto; padding: 10px; display: none; flex-direction: column; gap: 7px; }
-.panel.active { display: flex; }
+        width: 320px;
+        max-height: calc(100vh - 20px);
+        overflow-y: auto;
 
-.section-label {
-  font-size: 10px; color: #999; text-transform: uppercase;
-  letter-spacing: 0.07em; margin-top: 4px;
-}
-.toggle-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 0; border-bottom: 1px solid #e8e8e4;
-}
-.toggle-label { font-size: 12px; color: #222; }
-.toggle-sub { font-size: 10px; color: #aaa; }
+        background: rgba(20,20,20,0.95);
+        color: white;
 
-.toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute; inset: 0; background: #ccc;
-  border-radius: 9px; cursor: pointer; transition: background 0.2s;
-}
-.toggle-slider:before {
-  content: ''; position: absolute;
-  height: 12px; width: 12px; left: 3px; top: 3px;
-  background: white; border-radius: 50%; transition: transform 0.2s;
-}
-input:checked + .toggle-slider { background: #378ADD; }
-input:checked + .toggle-slider:before { transform: translateX(14px); }
+        border-radius: 12px;
+        padding: 16px;
+        box-sizing: border-box;
 
-.field-row { display: flex; flex-direction: column; gap: 3px; }
-.field-label { font-size: 11px; color: #666; }
-.field-input {
-  font-size: 12px; font-family: monospace;
-  background: #fff; border: 1px solid #ccc; border-radius: 6px;
-  padding: 5px 8px; color: #111; width: 100%;
-}
-.field-input:focus { outline: none; border-color: #888; }
+        backdrop-filter: blur(10px);
+    }
 
-.btn {
-  padding: 7px 10px; font-size: 11px; font-weight: 600;
-  font-family: monospace; border-radius: 6px; cursor: pointer;
-  width: 100%; transition: opacity 0.15s;
-}
-.btn-primary { background: #111; color: #fff; border: none; }
-.btn-primary:hover { opacity: 0.8; }
-.btn-secondary { background: none; border: 1px solid #ccc; color: #111; }
-.btn-secondary:hover { background: #eee; }
-.btn-danger { background: none; border: 1px solid #f5c6c6; color: #c0392b; }
-.btn-danger:hover { background: #fef0f0; }
-.btn-active { background: #378ADD; color: #fff; border: none; }
+    .panel h2 {
+        margin-top: 0;
+        font-size: 20px;
+    }
 
-.hint {
-  font-size: 11px; color: #888; padding: 6px 8px;
-  background: #fff; border-radius: 6px; border: 1px solid #e8e8e4;
-  line-height: 1.5;
-}
+    .section {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 12px;
+    }
 
-.marker-list { display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow-y: auto; }
-.marker-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 8px; background: #fff; border-radius: 6px;
-  border: 1px solid #e8e8e4; font-size: 11px;
-}
-.marker-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; }
-.marker-coords { color: #666; flex: 1; }
-.marker-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px; padding: 0 2px; }
-.marker-del:hover { color: #c0392b; }
+    .section:last-child {
+        border-bottom: none;
+    }
 
-.route-info {
-  font-size: 11px; color: #333; padding: 7px 8px;
-  background: #fff; border-radius: 6px; border: 1px solid #e8e8e4;
-  display: none;
-}
-.route-info.visible { display: block; }
+    label {
+        display: block;
+        margin-bottom: 8px;
+        cursor: pointer;
+    }
 
-.map-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-#map { flex: 1; }
+    button {
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #2d7fff;
+        color: white;
+        font-size: 14px;
+    }
 
-.map-hint {
-  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; font-family: monospace;
-  padding: 5px 12px; border-radius: 20px; pointer-events: none;
-  opacity: 0; transition: opacity 0.2s;
-}
-.map-hint.visible { opacity: 1; }
+    button:hover {
+        opacity: 0.9;
+    }
 
-.log {
-  background: #f0efe9; border-top: 1px solid #ddd;
-  padding: 6px 10px; font-size: 11px; font-family: monospace;
-  color: #666; max-height: 80px; overflow-y: auto;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.log-line { color: #222; }
-.log-line.info { color: #185FA5; }
-.log-line.err { color: #c0392b; }
-.log-line.muted { color: #aaa; }
-.log-line.ok { color: #27ae60; }
+    input[type="file"] {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 120px;
+        margin-top: 10px;
+        background: #000;
+        color: #0f0;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 10px;
+        box-sizing: border-box;
+        resize: vertical;
+        font-size: 12px;
+    }
+
+    .marker {
+        width: 48px;
+        height: 48px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        transform: translate(-24px, -48px);
+    }
+
+    .info {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 6px;
+    }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <div class="sidebar-head">
-    <h1>Яндекс Карты</h1>
-    <span class="badge">v3.x</span>
-  </div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('markers')">Маркеры</button>
-    <button class="tab" onclick="switchTab('route')">Маршрут</button>
-    <button class="tab" onclick="switchTab('style')">Стили</button>
-  </div>
+<div id="map"></div>
 
-  <!-- МАРКЕРЫ -->
-  <div class="panel active" id="panel-markers">
-    <div class="hint">Кликай на карту чтобы поставить маркер. Или введи координаты вручную.</div>
+<div class="panel">
+    <h2>Yandex Maps v3 Tester</h2>
 
-    <div style="display:flex; gap:6px; align-items:center;">
-      <button class="btn btn-secondary" id="click-mode-btn" style="flex:1" onclick="toggleClickMode()">режим клика: выкл</button>
-    </div>
+    <div class="section">
+        <h3>Слои</h3>
 
-    <div class="field-row">
-      <span class="field-label">Цвет маркера</span>
-      <input type="color" id="marker-color" value="#e34a30" style="width:100%; height:32px; border:1px solid #ccc; border-radius:6px; cursor:pointer; padding:2px;">
+        <label><input type="checkbox" checked data-layer="water"> Вода</label>
+        <label><input type="checkbox" checked data-layer="landscape"> Зелень</label>
+        <label><input type="checkbox" checked data-layer="poi"> POI</label>
+        <label><input type="checkbox" checked data-layer="road"> Дороги</label>
+        <label><input type="checkbox" checked data-layer="building"> Здания</label>
+        <label><input type="checkbox" checked data-layer="transit"> Транспорт</label>
+        <label><input type="checkbox" checked data-layer="country"> Границы</label>
+        <label><input type="checkbox" checked data-layer="address"> Адреса</label>
     </div>
 
-    <div class="field-row">
-      <span class="field-label">Подпись</span>
-      <input class="field-input" id="marker-label" placeholder="необязательно" />
+    <div class="section">
+        <h3>Маркеры</h3>
+
+        <input type="file" id="markerFile" accept=".png,.svg">
+
+        <div class="info">
+            Клик по карте добавляет маркер
+        </div>
+
+        <button id="clearMarkers">Очистить маркеры</button>
     </div>
 
-    <div class="field-row">
-      <span class="field-label">Координаты (lon, lat) — вручную</span>
-      <input class="field-input" id="manual-coords" placeholder="37.6176, 55.7558" />
-    </div>
-    <button class="btn btn-primary" onclick="addMarkerManual()">добавить маркер</button>
+    <div class="section">
+        <h3>Маршрут</h3>
 
-    <span class="section-label">на карте (<span id="marker-count">0</span>)</span>
-    <div class="marker-list" id="marker-list"></div>
-    <button class="btn btn-danger" onclick="clearAllMarkers()">удалить все маркеры</button>
-  </div>
-
-  <!-- МАРШРУТ -->
-  <div class="panel" id="panel-route">
-    <div class="hint">Выбери точки из добавленных маркеров или введи координаты. Маршрут — пешеходный.</div>
-
-    <div class="field-row">
-      <span class="field-label">Откуда (lon, lat)</span>
-      <input class="field-input" id="route-from" placeholder="37.6176, 55.7558" />
-    </div>
-    <div class="field-row">
-      <span class="field-label">Куда (lon, lat)</span>
-      <input class="field-input" id="route-to" placeholder="37.6300, 55.7600" />
+        <button id="buildRoute">Построить маршрут</button>
+        <button id="clearRoute">Удалить маршрут</button>
     </div>
 
-    <div class="field-row">
-      <span class="field-label">Тип маршрута</span>
-      <select class="field-input" id="route-type">
-        <option value="pedestrian">пешеходный</option>
-        <option value="driving">авто</option>
-        <option value="bicycle">велосипед</option>
-      </select>
-    </div>
+    <div class="section">
+        <h3>Экспорт JSON</h3>
 
-    <button class="btn btn-primary" onclick="buildRoute()">построить маршрут</button>
-    <button class="btn btn-secondary" onclick="clearRoute()">очистить маршрут</button>
+        <button id="exportJson">Export Style JSON</button>
 
-    <div class="route-info" id="route-info"></div>
-
-    <span class="section-label">использовать маркеры</span>
-    <div class="hint" id="route-markers-hint">Добавь маркеры на вкладке «Маркеры» — они появятся здесь.</div>
-    <div id="route-marker-btns" style="display:flex; flex-direction:column; gap:4px;"></div>
-  </div>
-
-  <!-- СТИЛИ -->
-  <div class="panel" id="panel-style">
-    <span class="section-label">POI — точки интереса</span>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Показывать POI</div><div class="toggle-sub">poi</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-poi" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+        <textarea id="jsonOutput"></textarea>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Транспорт</div><div class="toggle-sub">transit_location</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-transit" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Иконки POI</div><div class="toggle-sub">geometry</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-poi-icons" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Подписи POI</div><div class="toggle-sub">label</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-poi-labels" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <span class="section-label">Объекты карты</span>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Дороги</div><div class="toggle-sub">road</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-road" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Здания</div><div class="toggle-sub">structure</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-structure" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Вода</div><div class="toggle-sub">water</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-water" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Зелень</div><div class="toggle-sub">vegetation</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <span class="section-label">Тема</span>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-secondary" style="flex:1" onclick="setTheme('light')">light</button>
-      <button class="btn btn-secondary" style="flex:1" onclick="setTheme('dark')">dark</button>
-    </div>
-    <button class="btn btn-secondary" onclick="exportStyles()">скопировать JSON</button>
-  </div>
 </div>
 
-<div class="map-col">
-  <div id="map"></div>
-  <div class="map-hint" id="map-hint">кликни на карту чтобы поставить маркер</div>
-  <div class="log" id="log">
-    <span class="log-line muted">// загрузка API...</span>
-  </div>
-</div>
+<script src="https://api-maps.yandex.ru/v3/?apikey=e2cf8129-ff43-4729-b542-1591d12b5fef&lang=ru_RU"></script>
 
-<script>
-let map = null, schemeLayer = null, featuresLayer = null;
-let currentTheme = 'light';
-let clickMode = false;
-let markers = []; // {id, coords, color, label, mapObj, el}
+<script type="module">
+
+await ymaps3.ready;
+
+const {
+    YMap,
+    YMapDefaultSchemeLayer,
+    YMapDefaultFeaturesLayer,
+    YMapMarker,
+    YMapFeature
+} = ymaps3;
+
+const map = new YMap(
+    document.getElementById('map'),
+    {
+        location: {
+            center: [37.617644, 55.755819],
+            zoom: 10
+        }
+    }
+);
+
+let customization = [];
+
+let schemeLayer = new YMapDefaultSchemeLayer({
+    customization
+});
+
+map.addChild(schemeLayer);
+map.addChild(new YMapDefaultFeaturesLayer());
+
+let markers = [];
 let routeFeature = null;
-let markerIdCounter = 0;
-let YMapMarkerClass = null;
-let YMapFeatureClass = null;
 
-// --- LOG ---
-function log(msg, type) {
-  const el = document.getElementById('log');
-  const line = document.createElement('span');
-  line.className = 'log-line' + (type ? ' ' + type : '');
-  const ts = new Date().toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  line.textContent = '[' + ts + '] ' + msg;
-  el.appendChild(line);
-  el.scrollTop = el.scrollHeight;
-}
+let customMarkerImage = null;
 
-// --- INIT ---
-async function initMap() {
-  try {
-    await ymaps3.ready;
-    const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapFeature, YMapListener } = ymaps3;
-    YMapMarkerClass = YMapMarker;
-    YMapFeatureClass = YMapFeature;
+function buildCustomization() {
 
-    map = new YMap(document.getElementById('map'), {
-      location: { center: [37.6176, 55.7558], zoom: 12 }
+    customization = [];
+
+    document.querySelectorAll('[data-layer]').forEach(el => {
+
+        const visible = el.checked;
+        const layer = el.dataset.layer;
+
+        customization.push({
+            tags: {
+                any: [layer]
+            },
+            stylers: [
+                {
+                    visibility: visible ? 'on' : 'off'
+                }
+            ]
+        });
+
     });
 
-    schemeLayer = new YMapDefaultSchemeLayer({ theme: 'light', customization: [] });
-    featuresLayer = new YMapDefaultFeaturesLayer();
+    map.removeChild(schemeLayer);
+
+    schemeLayer = new YMapDefaultSchemeLayer({
+        customization
+    });
+
     map.addChild(schemeLayer);
-    map.addChild(featuresLayer);
-
-    // клик на карту
-    const listener = new YMapListener({
-      layer: 'any',
-      onClick: (obj, event) => {
-        if (!clickMode) return;
-        const coords = event.coordinates;
-        if (coords) addMarkerAtCoords(coords);
-      }
-    });
-    map.addChild(listener);
-
-    log('Map v3 готова', 'ok');
-  } catch(e) {
-    log('Ошибка: ' + e.message, 'err');
-  }
 }
 
-// --- CLICK MODE ---
-function toggleClickMode() {
-  clickMode = !clickMode;
-  const btn = document.getElementById('click-mode-btn');
-  const hint = document.getElementById('map-hint');
-  if (clickMode) {
-    btn.textContent = 'режим клика: вкл';
-    btn.className = 'btn btn-active';
-    hint.classList.add('visible');
-  } else {
-    btn.textContent = 'режим клика: выкл';
-    btn.className = 'btn btn-secondary';
-    hint.classList.remove('visible');
-  }
-}
+document.querySelectorAll('[data-layer]').forEach(el => {
+    el.addEventListener('change', buildCustomization);
+});
 
-// --- MARKERS ---
-function makeMarkerEl(color, label) {
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; cursor:pointer;';
+buildCustomization();
 
-  const pin = document.createElement('div');
-  pin.style.cssText = `
-    width: 28px; height: 28px; border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    background: ${color};
-    border: 3px solid white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  `;
-  wrap.appendChild(pin);
+document.getElementById('markerFile').addEventListener('change', e => {
 
-  if (label) {
-    const lbl = document.createElement('div');
-    lbl.style.cssText = `
-      margin-top: 4px; font-size: 10px; font-family: monospace;
-      background: rgba(0,0,0,0.65); color: #fff;
-      padding: 2px 6px; border-radius: 10px; white-space: nowrap;
-    `;
-    lbl.textContent = label;
-    wrap.appendChild(lbl);
-  }
-  return wrap;
-}
+    const file = e.target.files[0];
+    if (!file) return;
 
-function addMarkerAtCoords(coords) {
-  const color = document.getElementById('marker-color').value;
-  const label = document.getElementById('marker-label').value.trim();
-  _addMarker(coords, color, label);
-}
+    const reader = new FileReader();
 
-function addMarkerManual() {
-  const raw = document.getElementById('manual-coords').value.trim();
-  if (!raw) return;
-  const parts = raw.split(',').map(s => parseFloat(s.trim()));
-  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) {
-    log('Неверный формат координат', 'err'); return;
-  }
-  const color = document.getElementById('marker-color').value;
-  const label = document.getElementById('marker-label').value.trim();
-  _addMarker(parts, color, label);
-}
-
-function _addMarker(coords, color, label) {
-  if (!map || !YMapMarkerClass) return;
-  const id = ++markerIdCounter;
-  const el = makeMarkerEl(color, label || ('#' + id));
-  const markerObj = new YMapMarkerClass({
-    coordinates: coords,
-    draggable: false
-  }, el);
-  map.addChild(markerObj);
-  const m = { id, coords, color, label: label || ('#' + id), mapObj: markerObj, el };
-  markers.push(m);
-  renderMarkerList();
-  updateRouteMarkerBtns();
-  log('маркер #' + id + ' → [' + coords.map(v=>v.toFixed(4)) + ']', 'info');
-}
-
-function removeMarker(id) {
-  const idx = markers.findIndex(m => m.id === id);
-  if (idx === -1) return;
-  try { map.removeChild(markers[idx].mapObj); } catch(e){}
-  markers.splice(idx, 1);
-  renderMarkerList();
-  updateRouteMarkerBtns();
-}
-
-function clearAllMarkers() {
-  markers.forEach(m => { try { map.removeChild(m.mapObj); } catch(e){} });
-  markers = [];
-  renderMarkerList();
-  updateRouteMarkerBtns();
-  log('все маркеры удалены');
-}
-
-function renderMarkerList() {
-  const list = document.getElementById('marker-list');
-  document.getElementById('marker-count').textContent = markers.length;
-  list.innerHTML = '';
-  if (markers.length === 0) {
-    list.innerHTML = '<span style="font-size:11px;color:#aaa;">пока нет маркеров</span>';
-    return;
-  }
-  markers.forEach(m => {
-    const item = document.createElement('div');
-    item.className = 'marker-item';
-    item.innerHTML = `
-      <div class="marker-dot" style="background:${m.color}"></div>
-      <span class="marker-coords">${m.label} [${m.coords[0].toFixed(3)}, ${m.coords[1].toFixed(3)}]</span>
-      <button class="marker-del" onclick="removeMarker(${m.id})">✕</button>
-    `;
-    list.appendChild(item);
-  });
-}
-
-function updateRouteMarkerBtns() {
-  const wrap = document.getElementById('route-marker-btns');
-  const hint = document.getElementById('route-markers-hint');
-  wrap.innerHTML = '';
-  if (markers.length === 0) {
-    hint.style.display = 'block';
-    return;
-  }
-  hint.style.display = 'none';
-  markers.forEach(m => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-secondary';
-    btn.style.cssText = 'display:flex; align-items:center; gap:6px; text-align:left;';
-    btn.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label}`;
-    btn.onclick = () => {
-      const fromEl = document.getElementById('route-from');
-      const toEl = document.getElementById('route-to');
-      if (!fromEl.value) {
-        fromEl.value = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
-        log('Откуда → ' + m.label, 'info');
-      } else {
-        toEl.value = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
-        log('Куда → ' + m.label, 'info');
-      }
+    reader.onload = ev => {
+        customMarkerImage = ev.target.result;
     };
-    wrap.appendChild(btn);
-  });
-}
 
-// --- ROUTE ---
-async function buildRoute() {
-  if (!map) return;
-  const fromRaw = document.getElementById('route-from').value.trim();
-  const toRaw = document.getElementById('route-to').value.trim();
-  const type = document.getElementById('route-type').value;
+    reader.readAsDataURL(file);
 
-  if (!fromRaw || !toRaw) { log('Укажи обе точки маршрута', 'err'); return; }
+});
 
-  const from = fromRaw.split(',').map(s => parseFloat(s.trim()));
-  const to = toRaw.split(',').map(s => parseFloat(s.trim()));
+map.addListener('click', (object, event) => {
 
-  if (from.length < 2 || to.length < 2) { log('Неверный формат координат', 'err'); return; }
+    const coords = event.coordinates;
 
-  clearRoute();
-  log('строю маршрут (' + type + ')...', 'muted');
+    const markerElement = document.createElement('div');
 
-  try {
-    const { route } = await ymaps3.route({
-      points: [from, to],
-      type: type,
+    markerElement.className = 'marker';
+
+    if (customMarkerImage) {
+        markerElement.style.backgroundImage = `url(${customMarkerImage})`;
+    } else {
+        markerElement.style.backgroundImage =
+            'url(https://cdn-icons-png.flaticon.com/512/684/684908.png)';
+    }
+
+    const marker = new YMapMarker(
+        {
+            coordinates: coords,
+            draggable: true
+        },
+        markerElement
+    );
+
+    map.addChild(marker);
+
+    markers.push({
+        marker,
+        coordinates: coords
     });
 
-    if (!route) { log('Маршрут не найден', 'err'); return; }
+});
 
-    const geometry = route.toRoute().geometry;
+document.getElementById('clearMarkers').addEventListener('click', () => {
 
-    routeFeature = new YMapFeatureClass({
-      geometry,
-      style: {
-        stroke: [{ color: type === 'pedestrian' ? '#378ADD' : type === 'driving' ? '#e34a30' : '#27ae60', width: 4 }],
-        simplificationRate: 0
-      }
+    markers.forEach(m => {
+        map.removeChild(m.marker);
     });
+
+    markers = [];
+
+});
+
+document.getElementById('buildRoute').addEventListener('click', async () => {
+
+    if (markers.length < 2) {
+        alert('Нужно минимум 2 маркера');
+        return;
+    }
+
+    if (routeFeature) {
+        map.removeChild(routeFeature);
+    }
+
+    const coordinates = markers.map(m => m.coordinates);
+
+    routeFeature = new YMapFeature({
+        geometry: {
+            type: 'LineString',
+            coordinates
+        },
+        style: {
+            stroke: [{
+                color: '#ff0000',
+                width: 5
+            }]
+        }
+    });
+
     map.addChild(routeFeature);
 
-    // инфо о маршруте
-    const props = route.toRoute().properties || {};
-    const info = document.getElementById('route-info');
-    let infoText = '✓ маршрут построен';
-    if (props.duration) infoText += ' · ' + Math.round(props.duration / 60) + ' мин';
-    if (props.distance) infoText += ' · ' + (props.distance / 1000).toFixed(1) + ' км';
-    info.textContent = infoText;
-    info.className = 'route-info visible';
-
-    log('маршрут готов', 'ok');
-  } catch(e) {
-    log('Ошибка маршрута: ' + e.message, 'err');
-  }
-}
-
-function clearRoute() {
-  if (routeFeature && map) {
-    try { map.removeChild(routeFeature); } catch(e){}
-    routeFeature = null;
-  }
-  document.getElementById('route-info').className = 'route-info';
-}
-
-// --- STYLES ---
-function buildCustomization() {
-  const styles = [];
-  const g = id => document.getElementById(id).checked;
-  if (!g('tog-poi')) {
-    styles.push({ tags: { all: ['poi'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    styles.push({ tags: { all: ['poi'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  } else {
-    if (!g('tog-poi-icons')) styles.push({ tags: { all: ['poi'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    if (!g('tog-poi-labels')) styles.push({ tags: { all: ['poi'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  }
-  if (!g('tog-transit')) {
-    styles.push({ tags: { all: ['transit_location'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    styles.push({ tags: { all: ['transit_location'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  }
-  if (!g('tog-road')) {
-    styles.push({ tags: { all: ['road'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    styles.push({ tags: { all: ['road'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  }
-  if (!g('tog-structure')) styles.push({ tags: { all: ['structure'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-  if (!g('tog-water')) styles.push({ tags: { all: ['water'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-  if (!g('tog-vegetation')) styles.push({ tags: { all: ['vegetation'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-  return styles;
-}
-
-function applyStyles() {
-  if (!schemeLayer) return;
-  const styles = buildCustomization();
-  schemeLayer.update({ customization: styles, theme: currentTheme });
-  log('стили обновлены (' + styles.length + ' правил)', 'info');
-}
-
-function setTheme(t) { currentTheme = t; applyStyles(); log('theme → ' + t, 'info'); }
-
-function exportStyles() {
-  const json = JSON.stringify(buildCustomization(), null, 2);
-  navigator.clipboard.writeText(json)
-    .then(() => log('скопировано в буфер', 'ok'))
-    .catch(() => { console.log(json); log('JSON в консоли (F12)', 'info'); });
-}
-
-// --- TABS ---
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['markers','route','style'][i] === name);
-  });
-  document.querySelectorAll('.panel').forEach(p => {
-    p.classList.toggle('active', p.id === 'panel-' + name);
-  });
-}
-
-// --- START ---
-window.addEventListener('load', function() {
-  if (typeof ymaps3 === 'undefined') {
-    document.getElementById('log').innerHTML = '<span class="log-line err">Яндекс API не загрузился. Проверь соединение и что открыто через localhost.</span>';
-    return;
-  }
-  ymaps3.ready.then(function() { initMap(); }).catch(function(e) {
-    document.getElementById('log').innerHTML = '<span class="log-line err">Ошибка: ' + e.message + '</span>';
-  });
 });
+
+document.getElementById('clearRoute').addEventListener('click', () => {
+
+    if (routeFeature) {
+        map.removeChild(routeFeature);
+        routeFeature = null;
+    }
+
+});
+
+document.getElementById('exportJson').addEventListener('click', () => {
+
+    const json = JSON.stringify(customization, null, 2);
+
+    document.getElementById('jsonOutput').value = json;
+
+});
+
 </script>
+
 </body>
-</html>
+  </html>
