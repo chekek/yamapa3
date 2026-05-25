@@ -4,122 +4,94 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Yandex Maps 3.0 Style Tester</title>
+<title>Yandex Maps v3 Tester</title>
 
 <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-        background: #111;
-    }
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
 
-    #map {
-        width: 100%;
-        height: 100%;
-    }
+#map {
+    width: 100%;
+    height: 100%;
+}
 
-    .panel {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 1000;
+.panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
 
-        width: 320px;
-        max-height: calc(100vh - 20px);
-        overflow-y: auto;
+    width: 320px;
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
 
-        background: rgba(20,20,20,0.95);
-        color: white;
+    background: rgba(0,0,0,0.88);
+    color: white;
 
-        border-radius: 12px;
-        padding: 16px;
-        box-sizing: border-box;
+    padding: 16px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
 
-        backdrop-filter: blur(10px);
-    }
+.panel h2 {
+    margin-top: 0;
+}
 
-    .panel h2 {
-        margin-top: 0;
-        font-size: 20px;
-    }
+.section {
+    margin-bottom: 20px;
+}
 
-    .section {
-        margin-bottom: 20px;
-        border-bottom: 1px solid #333;
-        padding-bottom: 12px;
-    }
+label {
+    display: block;
+    margin-bottom: 8px;
+}
 
-    .section:last-child {
-        border-bottom: none;
-    }
+button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #2d7fff;
+    color: white;
+}
 
-    label {
-        display: block;
-        margin-bottom: 8px;
-        cursor: pointer;
-    }
+textarea {
+    width: 100%;
+    height: 120px;
+    margin-top: 10px;
+    background: #111;
+    color: #0f0;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    box-sizing: border-box;
+}
 
-    button {
-        width: 100%;
-        margin-top: 8px;
-        padding: 10px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        background: #2d7fff;
-        color: white;
-        font-size: 14px;
-    }
-
-    button:hover {
-        opacity: 0.9;
-    }
-
-    input[type="file"] {
-        width: 100%;
-        margin-top: 8px;
-    }
-
-    textarea {
-        width: 100%;
-        height: 120px;
-        margin-top: 10px;
-        background: #000;
-        color: #0f0;
-        border: 1px solid #333;
-        border-radius: 8px;
-        padding: 10px;
-        box-sizing: border-box;
-        resize: vertical;
-        font-size: 12px;
-    }
-
-    .marker {
-        width: 48px;
-        height: 48px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        transform: translate(-24px, -48px);
-    }
-
-    .info {
-        font-size: 12px;
-        color: #aaa;
-        margin-top: 6px;
-    }
+.marker {
+    width: 48px;
+    height: 48px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: translate(-24px, -48px);
+}
 </style>
 </head>
+
 <body>
 
 <div id="map"></div>
 
 <div class="panel">
-    <h2>Yandex Maps v3 Tester</h2>
+
+    <h2>Yandex Maps v3</h2>
 
     <div class="section">
         <h3>Слои</h3>
@@ -130,8 +102,6 @@
         <label><input type="checkbox" checked data-layer="road"> Дороги</label>
         <label><input type="checkbox" checked data-layer="building"> Здания</label>
         <label><input type="checkbox" checked data-layer="transit"> Транспорт</label>
-        <label><input type="checkbox" checked data-layer="country"> Границы</label>
-        <label><input type="checkbox" checked data-layer="address"> Адреса</label>
     </div>
 
     <div class="section">
@@ -139,27 +109,33 @@
 
         <input type="file" id="markerFile" accept=".png,.svg">
 
-        <div class="info">
-            Клик по карте добавляет маркер
-        </div>
-
-        <button id="clearMarkers">Очистить маркеры</button>
+        <button id="clearMarkers">
+            Очистить маркеры
+        </button>
     </div>
 
     <div class="section">
         <h3>Маршрут</h3>
 
-        <button id="buildRoute">Построить маршрут</button>
-        <button id="clearRoute">Удалить маршрут</button>
+        <button id="buildRoute">
+            Построить линию
+        </button>
+
+        <button id="clearRoute">
+            Удалить маршрут
+        </button>
     </div>
 
     <div class="section">
-        <h3>Экспорт JSON</h3>
+        <h3>JSON</h3>
 
-        <button id="exportJson">Export Style JSON</button>
+        <button id="exportJson">
+            Export JSON
+        </button>
 
         <textarea id="jsonOutput"></textarea>
     </div>
+
 </div>
 
 <script src="https://api-maps.yandex.ru/v3/?apikey=e2cf8129-ff43-4729-b542-1591d12b5fef&lang=ru_RU"></script>
@@ -173,7 +149,8 @@ const {
     YMapDefaultSchemeLayer,
     YMapDefaultFeaturesLayer,
     YMapMarker,
-    YMapFeature
+    YMapFeature,
+    YMapListener
 } = ymaps3;
 
 const map = new YMap(
@@ -188,58 +165,54 @@ const map = new YMap(
 
 let customization = [];
 
-let schemeLayer = new YMapDefaultSchemeLayer({
+const schemeLayer = new YMapDefaultSchemeLayer({
     customization
 });
 
+const featuresLayer = new YMapDefaultFeaturesLayer();
+
 map.addChild(schemeLayer);
-map.addChild(new YMapDefaultFeaturesLayer());
+map.addChild(featuresLayer);
 
 let markers = [];
 let routeFeature = null;
 
 let customMarkerImage = null;
 
-function buildCustomization() {
+function rebuildCustomization() {
 
-    customization = [];
+    customization.length = 0;
 
     document.querySelectorAll('[data-layer]').forEach(el => {
 
-        const visible = el.checked;
-        const layer = el.dataset.layer;
-
         customization.push({
             tags: {
-                any: [layer]
+                any: [el.dataset.layer]
             },
             stylers: [
                 {
-                    visibility: visible ? 'on' : 'off'
+                    visibility: el.checked ? 'on' : 'off'
                 }
             ]
         });
 
     });
 
-    map.removeChild(schemeLayer);
-
-    schemeLayer = new YMapDefaultSchemeLayer({
+    schemeLayer.update({
         customization
     });
-
-    map.addChild(schemeLayer);
 }
 
 document.querySelectorAll('[data-layer]').forEach(el => {
-    el.addEventListener('change', buildCustomization);
+    el.addEventListener('change', rebuildCustomization);
 });
 
-buildCustomization();
+rebuildCustomization();
 
 document.getElementById('markerFile').addEventListener('change', e => {
 
     const file = e.target.files[0];
+
     if (!file) return;
 
     const reader = new FileReader();
@@ -252,37 +225,40 @@ document.getElementById('markerFile').addEventListener('change', e => {
 
 });
 
-map.addListener('click', (object, event) => {
+const listener = new YMapListener({
+    layer: 'any',
 
-    const coords = event.coordinates;
+    onClick: (object, event) => {
 
-    const markerElement = document.createElement('div');
+        const coords = event.coordinates;
 
-    markerElement.className = 'marker';
+        const markerElement = document.createElement('div');
 
-    if (customMarkerImage) {
-        markerElement.style.backgroundImage = `url(${customMarkerImage})`;
-    } else {
-        markerElement.style.backgroundImage =
-            'url(https://cdn-icons-png.flaticon.com/512/684/684908.png)';
+        markerElement.className = 'marker';
+
+        markerElement.style.backgroundImage = `url(${
+            customMarkerImage ||
+            'https://cdn-icons-png.flaticon.com/512/684/684908.png'
+        })`;
+
+        const marker = new YMapMarker(
+            {
+                coordinates: coords
+            },
+            markerElement
+        );
+
+        map.addChild(marker);
+
+        markers.push({
+            marker,
+            coordinates: coords
+        });
+
     }
-
-    const marker = new YMapMarker(
-        {
-            coordinates: coords,
-            draggable: true
-        },
-        markerElement
-    );
-
-    map.addChild(marker);
-
-    markers.push({
-        marker,
-        coordinates: coords
-    });
-
 });
+
+map.addChild(listener);
 
 document.getElementById('clearMarkers').addEventListener('click', () => {
 
@@ -294,7 +270,7 @@ document.getElementById('clearMarkers').addEventListener('click', () => {
 
 });
 
-document.getElementById('buildRoute').addEventListener('click', async () => {
+document.getElementById('buildRoute').addEventListener('click', () => {
 
     if (markers.length < 2) {
         alert('Нужно минимум 2 маркера');
@@ -313,10 +289,12 @@ document.getElementById('buildRoute').addEventListener('click', async () => {
             coordinates
         },
         style: {
-            stroke: [{
-                color: '#ff0000',
-                width: 5
-            }]
+            stroke: [
+                {
+                    color: '#ff0000',
+                    width: 4
+                }
+            ]
         }
     });
 
@@ -335,13 +313,12 @@ document.getElementById('clearRoute').addEventListener('click', () => {
 
 document.getElementById('exportJson').addEventListener('click', () => {
 
-    const json = JSON.stringify(customization, null, 2);
-
-    document.getElementById('jsonOutput').value = json;
+    document.getElementById('jsonOutput').value =
+        JSON.stringify(customization, null, 2);
 
 });
 
 </script>
 
 </body>
-  </html>
+    </html>
