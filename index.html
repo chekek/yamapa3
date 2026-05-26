@@ -3,1002 +3,580 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YMap3 Studio</title>
-<script src="https://api-maps.yandex.ru/v3/?apikey=e2cf8129-ff43-4729-b542-1591d12b5fef&lang=ru_RU"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@300;600;800&display=swap" rel="stylesheet">
+<title>Яндекс Карты v3 — стенд</title>
+<script src="https://api-maps.yandex.ru/v3/?apikey=e2cf8129-ff43-4729-b542-1591d12b5fef&lang=ru_RU" defer></script>
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --panel: #111118;
-    --border: #1e1e2e;
-    --accent: #7c3aed;
-    --accent2: #06b6d4;
-    --accent3: #f59e0b;
-    --text: #e2e8f0;
-    --text-dim: #64748b;
-    --green: #10b981;
-    --red: #ef4444;
-    --panel-w: 300px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: monospace; background: #f5f5f3; display: flex; height: 100vh; overflow: hidden; }
 
-  /* === LEFT PANEL === */
-  #sidebar {
-    width: var(--panel-w);
-    min-width: var(--panel-w);
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 10;
-  }
-  #sidebar-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  #sidebar-header h1 {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.15em;
-    color: var(--accent2);
-    text-transform: uppercase;
-  }
-  #sidebar-header p { font-size: 9px; color: var(--text-dim); margin-top: 3px; letter-spacing: 0.05em; }
-  #sidebar-body { flex: 1; overflow-y: auto; padding: 8px; }
-  #sidebar-body::-webkit-scrollbar { width: 4px; }
-  #sidebar-body::-webkit-scrollbar-track { background: transparent; }
-  #sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar {
+  width: 280px; flex-shrink: 0;
+  background: #f0efe9;
+  border-right: 1px solid #ddd;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid #ddd;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-head h1 { font-size: 13px; font-weight: 600; }
+.badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #d4e8fa; color: #185FA5; font-weight: 600; }
 
-  .section {
-    margin-bottom: 6px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .section-header {
-    padding: 8px 12px;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    background: rgba(255,255,255,0.02);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-  }
-  .section-header:hover { color: var(--text); }
-  .section-header .arrow { transition: transform 0.2s; font-size: 8px; }
-  .section-header.collapsed .arrow { transform: rotate(-90deg); }
-  .section-body { padding: 10px; display: flex; flex-direction: column; gap: 4px; }
-  .section-body.hidden { display: none; }
+.tabs { display: flex; border-bottom: 1px solid #ddd; }
+.tab {
+  flex: 1; padding: 8px 4px; font-size: 11px; font-weight: 600;
+  color: #888; background: none; border: none; cursor: pointer;
+  font-family: monospace;
+}
+.tab.active { color: #111; background: #fff; border-bottom: 2px solid #111; }
+.tab:hover:not(.active) { background: #e8e8e4; }
 
-  /* Toggle rows */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .toggle-row:hover { background: rgba(255,255,255,0.03); }
-  .toggle-label { flex: 1; font-size: 10px; color: var(--text); }
-  .toggle-label small { display: block; color: var(--text-dim); font-size: 8px; margin-top: 1px; }
-  .toggle-dot {
-    width: 26px;
-    height: 14px;
-    border-radius: 7px;
-    background: var(--border);
-    position: relative;
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-  .toggle-dot::after {
-    content: '';
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--text-dim);
-    position: absolute;
-    top: 2px; left: 2px;
-    transition: transform 0.2s, background 0.2s;
-  }
-  .toggle-row.on .toggle-dot { background: var(--accent); }
-  .toggle-row.on .toggle-dot::after { transform: translateX(12px); background: white; }
-  .toggle-row.on .toggle-label { color: white; }
+.panel { flex: 1; overflow-y: auto; padding: 10px; display: none; flex-direction: column; gap: 7px; }
+.panel.active { display: flex; }
 
-  /* Color pickers */
-  .color-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-  }
-  .color-row label { font-size: 10px; color: var(--text-dim); flex: 1; }
-  .color-row input[type=color] {
-    width: 28px; height: 20px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    background: transparent;
-    cursor: pointer;
-    padding: 1px;
-  }
-  .color-row .hex-input {
-    width: 70px; font-size: 9px;
-    background: var(--bg); border: 1px solid var(--border);
-    color: var(--text); padding: 3px 6px;
-    border-radius: 3px; font-family: 'JetBrains Mono', monospace;
-  }
+.section-label {
+  font-size: 10px; color: #999; text-transform: uppercase;
+  letter-spacing: 0.07em; margin-top: 4px;
+}
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 0; border-bottom: 1px solid #e8e8e4;
+}
+.toggle-label { font-size: 12px; color: #222; }
+.toggle-sub { font-size: 10px; color: #aaa; }
 
-  /* Marker section */
-  .btn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    padding: 7px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #6d28d9; }
-  .btn-secondary { background: var(--border); color: var(--text); }
-  .btn-secondary:hover { background: #2e2e45; }
-  .btn-danger { background: #1f0a0a; color: var(--red); border: 1px solid #3d1010; }
-  .btn-danger:hover { background: #2d0e0e; }
-  .btn-export { background: #0a1f0a; color: var(--green); border: 1px solid #0d3d0d; width: 100%; margin-bottom: 4px; }
-  .btn-export:hover { background: #0d2d0d; }
+.toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: #ccc;
+  border-radius: 9px; cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider:before {
+  content: ''; position: absolute;
+  height: 12px; width: 12px; left: 3px; top: 3px;
+  background: white; border-radius: 50%; transition: transform 0.2s;
+}
+input:checked + .toggle-slider { background: #378ADD; }
+input:checked + .toggle-slider:before { transform: translateX(14px); }
 
-  .input-file-btn {
-    display: block;
-    width: 100%;
-    padding: 7px;
-    background: var(--bg);
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    text-align: center;
-    font-size: 9px;
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-  .input-file-btn:hover { border-color: var(--accent); color: var(--accent); }
-  #fileInput { display: none; }
+.field-row { display: flex; flex-direction: column; gap: 3px; }
+.field-label { font-size: 11px; color: #666; }
+.field-input {
+  font-size: 12px; font-family: monospace;
+  background: #fff; border: 1px solid #ccc; border-radius: 6px;
+  padding: 5px 8px; color: #111; width: 100%;
+}
+.field-input:focus { outline: none; border-color: #888; }
 
-  .marker-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-  .marker-item {
-    display: flex; align-items: center; gap: 6px;
-    padding: 5px 8px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 4px; font-size: 9px;
-  }
-  .marker-item .mi-icon { width: 20px; height: 20px; border-radius: 2px; overflow: hidden; background: var(--border); flex-shrink: 0; }
-  .marker-item .mi-icon img { width: 100%; height: 100%; object-fit: cover; }
-  .marker-item .mi-coords { flex: 1; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .marker-item .mi-del { color: var(--red); cursor: pointer; font-size: 11px; line-height: 1; }
-  .marker-item .mi-del:hover { color: #ff6666; }
+.btn {
+  padding: 7px 10px; font-size: 11px; font-weight: 600;
+  font-family: monospace; border-radius: 6px; cursor: pointer;
+  width: 100%; transition: opacity 0.15s;
+}
+.btn-primary { background: #111; color: #fff; border: none; }
+.btn-primary:hover { opacity: 0.8; }
+.btn-secondary { background: none; border: 1px solid #ccc; color: #111; }
+.btn-secondary:hover { background: #eee; }
+.btn-danger { background: none; border: 1px solid #f5c6c6; color: #c0392b; }
+.btn-danger:hover { background: #fef0f0; }
+.btn-active { background: #378ADD; color: #fff; border: none; }
 
-  /* Route */
-  .route-info {
-    font-size: 9px; color: var(--text-dim);
-    padding: 6px 8px;
-    background: var(--bg);
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    line-height: 1.6;
-  }
-  .route-info b { color: var(--accent2); }
+.hint {
+  font-size: 11px; color: #888; padding: 6px 8px;
+  background: #fff; border-radius: 6px; border: 1px solid #e8e8e4;
+  line-height: 1.5;
+}
 
-  /* Map container */
-  #map-wrap { flex: 1; position: relative; }
-  #map { width: 100%; height: 100%; }
+.marker-list { display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow-y: auto; }
+.marker-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px; background: #fff; border-radius: 6px;
+  border: 1px solid #e8e8e4; font-size: 11px;
+}
+.marker-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; }
+.marker-coords { color: #666; flex: 1; }
+.marker-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px; padding: 0 2px; }
+.marker-del:hover { color: #c0392b; }
 
-  /* Top toolbar */
-  #toolbar {
-    position: absolute;
-    top: 12px; left: 12px;
-    display: flex; gap: 6px;
-    z-index: 100;
-  }
-  .tool-btn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px; font-weight: 600;
-    letter-spacing: 0.05em;
-    padding: 7px 12px;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-  }
-  .tool-btn:hover, .tool-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(124,58,237,0.12);
-  }
-  .tool-btn.active-place {
-    border-color: var(--accent3);
-    color: var(--accent3);
-    background: rgba(245,158,11,0.12);
-    animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+.route-info {
+  font-size: 11px; color: #333; padding: 7px 8px;
+  background: #fff; border-radius: 6px; border: 1px solid #e8e8e4;
+  display: none;
+}
+.route-info.visible { display: block; }
 
-  /* Status bar */
-  #statusbar {
-    position: absolute;
-    bottom: 12px; left: 12px;
-    font-size: 9px;
-    color: var(--text-dim);
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--border);
-    padding: 6px 10px;
-    border-radius: 4px;
-    pointer-events: none;
-    letter-spacing: 0.05em;
-  }
-  #statusbar span { color: var(--accent2); }
+.map-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+#map { flex: 1; }
 
-  /* Modal */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    width: 560px;
-    max-width: 95vw;
-    padding: 0;
-    overflow: hidden;
-  }
-  .modal-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Unbounded', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent2);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .modal-close { cursor: pointer; color: var(--text-dim); font-size: 16px; line-height: 1; }
-  .modal-close:hover { color: var(--text); }
-  .modal-body { padding: 16px; }
-  .modal-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
-  .modal-tab {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px; font-weight: 600;
-    padding: 5px 10px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-dim);
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  .modal-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(124,58,237,0.1); }
-  .code-area {
-    width: 100%;
-    height: 300px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--accent2);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    line-height: 1.6;
-    padding: 12px;
-    border-radius: 4px;
-    resize: none;
-    outline: none;
-  }
-  .modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+.map-hint {
+  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; font-family: monospace;
+  padding: 5px 12px; border-radius: 20px; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+}
+.map-hint.visible { opacity: 1; }
 
-  /* Theme select */
-  select.styled-select {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    padding: 5px 8px;
-    border-radius: 4px;
-    outline: none;
-    width: 100%;
-    cursor: pointer;
-  }
-  .form-row { margin-bottom: 8px; }
-  .form-row label { display: block; font-size: 9px; color: var(--text-dim); margin-bottom: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+.log {
+  background: #f0efe9; border-top: 1px solid #ddd;
+  padding: 6px 10px; font-size: 11px; font-family: monospace;
+  color: #666; max-height: 80px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.log-line { color: #222; }
+.log-line.info { color: #185FA5; }
+.log-line.err { color: #c0392b; }
+.log-line.muted { color: #aaa; }
+.log-line.ok { color: #27ae60; }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<div id="sidebar">
-  <div id="sidebar-header">
-    <h1>YMap3 Studio</h1>
-    <p>Яндекс Карты JS API 3.0 · Тестирование стилей</p>
+<div class="sidebar">
+  <div class="sidebar-head">
+    <h1>Яндекс Карты</h1>
+    <span class="badge">v3.x</span>
   </div>
-  <div id="sidebar-body">
-
-    <!-- THEME -->
-    <div class="section">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span>🎨 Тема карты</span><span class="arrow">▾</span>
-      </div>
-      <div class="section-body">
-        <div class="form-row">
-          <label>Базовая тема</label>
-          <select class="styled-select" id="themeSelect" onchange="applyStyle()">
-            <option value="light">Light (светлая)</option>
-            <option value="dark">Dark (тёмная)</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- LAYERS VISIBILITY -->
-    <div class="section">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span>👁 Слои карты</span><span class="arrow">▾</span>
-      </div>
-      <div class="section-body" id="layerToggles">
-        <!-- generated by JS -->
-      </div>
-    </div>
-
-    <!-- COLORS -->
-    <div class="section">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span>🎨 Цвета объектов</span><span class="arrow">▾</span>
-      </div>
-      <div class="section-body" id="colorPickers">
-        <!-- generated by JS -->
-      </div>
-    </div>
-
-    <!-- MARKERS -->
-    <div class="section">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span>📍 Маркеры</span><span class="arrow">▾</span>
-      </div>
-      <div class="section-body">
-        <label class="input-file-btn" for="fileInput">
-          ⬆ Загрузить иконку (PNG/SVG)
-        </label>
-        <input type="file" id="fileInput" accept=".png,.svg,image/png,image/svg+xml" onchange="loadMarkerIcon(this)">
-        <div style="margin-top:6px; font-size:9px; color:var(--text-dim);">
-          Иконка: <span id="iconName" style="color:var(--accent2)">по умолчанию</span>
-        </div>
-        <div style="margin-top:8px;">
-          <button class="btn btn-primary" id="placeBtn" onclick="togglePlaceMode()" style="width:100%">
-            + Поставить маркер
-          </button>
-        </div>
-        <div id="markerList" class="marker-list"></div>
-        <div style="margin-top:6px">
-          <button class="btn btn-danger" style="width:100%; font-size:9px" onclick="clearMarkers()">🗑 Очистить все маркеры</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ROUTE -->
-    <div class="section">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span>🛣 Маршрут</span><span class="arrow">▾</span>
-      </div>
-      <div class="section-body">
-        <div class="route-info" id="routeInfo">
-          Поставьте ≥ 2 маркера, чтобы построить маршрут.
-        </div>
-        <div style="margin-top:6px; display:flex; gap:4px; flex-wrap:wrap;">
-          <button class="btn btn-secondary" style="flex:1" onclick="buildRoute()">▶ Построить</button>
-          <button class="btn btn-danger" style="flex:1" onclick="clearRoute()">✕ Сбросить</button>
-        </div>
-        <div class="form-row" style="margin-top:8px">
-          <label>Тип маршрута</label>
-          <select class="styled-select" id="routeType">
-            <option value="driving">🚗 Авто</option>
-            <option value="pedestrian">🚶 Пешком</option>
-            <option value="bicycle">🚲 Велосипед</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- EXPORT -->
-    <div class="section">
-      <div class="section-header" onclick="toggleSection(this)">
-        <span>💾 Экспорт</span><span class="arrow">▾</span>
-      </div>
-      <div class="section-body">
-        <button class="btn btn-export" onclick="exportModal('json')">⬇ Скачать стиль JSON</button>
-        <button class="btn btn-export" onclick="exportModal('html')">⬇ Скачать готовый HTML</button>
-      </div>
-    </div>
-
-  </div><!-- sidebar-body -->
-</div><!-- sidebar -->
-
-<!-- MAP AREA -->
-<div id="map-wrap">
-  <div id="map"></div>
-  <div id="toolbar">
-    <button class="tool-btn active" id="navBtn" onclick="setTool('nav')">✥ Навигация</button>
-    <button class="tool-btn" id="placeToolBtn" onclick="setTool('place')">◉ Маркер</button>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('markers')">Маркеры</button>
+    <button class="tab" onclick="switchTab('route')">Маршрут</button>
+    <button class="tab" onclick="switchTab('style')">Стили</button>
   </div>
-  <div id="statusbar">
-    Инструмент: <span id="toolLabel">Навигация</span> &nbsp;|&nbsp;
-    Маркеров: <span id="markerCount">0</span>
+
+  <!-- МАРКЕРЫ -->
+  <div class="panel active" id="panel-markers">
+    <div class="hint">Кликай на карту чтобы поставить маркер. Или введи координаты вручную.</div>
+
+    <div style="display:flex; gap:6px; align-items:center;">
+      <button class="btn btn-secondary" id="click-mode-btn" style="flex:1" onclick="toggleClickMode()">режим клика: выкл</button>
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">Цвет маркера</span>
+      <input type="color" id="marker-color" value="#e34a30" style="width:100%; height:32px; border:1px solid #ccc; border-radius:6px; cursor:pointer; padding:2px;">
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">Подпись</span>
+      <input class="field-input" id="marker-label" placeholder="необязательно" />
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">Координаты (lon, lat) — вручную</span>
+      <input class="field-input" id="manual-coords" placeholder="37.6176, 55.7558" />
+    </div>
+    <button class="btn btn-primary" onclick="addMarkerManual()">добавить маркер</button>
+
+    <span class="section-label">на карте (<span id="marker-count">0</span>)</span>
+    <div class="marker-list" id="marker-list"></div>
+    <button class="btn btn-danger" onclick="clearAllMarkers()">удалить все маркеры</button>
+  </div>
+
+  <!-- МАРШРУТ -->
+  <div class="panel" id="panel-route">
+    <div class="hint">Выбери точки из добавленных маркеров или введи координаты. Маршрут — пешеходный.</div>
+
+    <div class="field-row">
+      <span class="field-label">Откуда (lon, lat)</span>
+      <input class="field-input" id="route-from" placeholder="37.6176, 55.7558" />
+    </div>
+    <div class="field-row">
+      <span class="field-label">Куда (lon, lat)</span>
+      <input class="field-input" id="route-to" placeholder="37.6300, 55.7600" />
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">Тип маршрута</span>
+      <select class="field-input" id="route-type">
+        <option value="pedestrian">пешеходный</option>
+        <option value="driving">авто</option>
+        <option value="bicycle">велосипед</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="buildRoute()">построить маршрут</button>
+    <button class="btn btn-secondary" onclick="clearRoute()">очистить маршрут</button>
+
+    <div class="route-info" id="route-info"></div>
+
+    <span class="section-label">использовать маркеры</span>
+    <div class="hint" id="route-markers-hint">Добавь маркеры на вкладке «Маркеры» — они появятся здесь.</div>
+    <div id="route-marker-btns" style="display:flex; flex-direction:column; gap:4px;"></div>
+  </div>
+
+  <!-- СТИЛИ -->
+  <div class="panel" id="panel-style">
+    <span class="section-label">POI — точки интереса</span>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Показывать POI</div><div class="toggle-sub">poi</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-poi" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Транспорт</div><div class="toggle-sub">transit_location</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-transit" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Иконки POI</div><div class="toggle-sub">geometry</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-poi-icons" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Подписи POI</div><div class="toggle-sub">label</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-poi-labels" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <span class="section-label">Объекты карты</span>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Дороги</div><div class="toggle-sub">road</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-road" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Здания</div><div class="toggle-sub">structure</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-structure" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Вода</div><div class="toggle-sub">water</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-water" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="toggle-label">Зелень</div><div class="toggle-sub">vegetation</div></div>
+      <label class="toggle"><input type="checkbox" id="tog-vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    </div>
+    <span class="section-label">Тема</span>
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-secondary" style="flex:1" onclick="setTheme('light')">light</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="setTheme('dark')">dark</button>
+    </div>
+    <button class="btn btn-secondary" onclick="exportStyles()">скопировать JSON</button>
   </div>
 </div>
 
-<!-- EXPORT MODAL -->
-<div class="modal-overlay" id="exportModal">
-  <div class="modal">
-    <div class="modal-header">
-      <span id="exportTitle">Экспорт</span>
-      <span class="modal-close" onclick="closeModal()">✕</span>
-    </div>
-    <div class="modal-body">
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tabJson" onclick="switchTab('json')">JSON стиль</button>
-        <button class="modal-tab" id="tabHtml" onclick="switchTab('html')">HTML код</button>
-      </div>
-      <textarea class="code-area" id="exportCode" readonly></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="copyExport()">📋 Копировать</button>
-      <button class="btn btn-primary" onclick="downloadExport()">⬇ Скачать файл</button>
-      <button class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
-    </div>
+<div class="map-col">
+  <div id="map"></div>
+  <div class="map-hint" id="map-hint">кликни на карту чтобы поставить маркер</div>
+  <div class="log" id="log">
+    <span class="log-line muted">// загрузка API...</span>
   </div>
 </div>
 
 <script>
-// =============================================
-// КОНФИГУРАЦИЯ СЛОЁВ
-// =============================================
-const LAYERS = [
-  // Геометрия
-  { id: 'water',       label: 'Вода',            hint: 'Реки, озёра, моря',          tags: ['water'],       category: 'geo' },
-  { id: 'vegetation',  label: 'Растительность',  hint: 'Парки, леса, газоны',        tags: ['vegetation'],  category: 'geo' },
-  { id: 'landscape',   label: 'Ландшафт',        hint: 'Поля, пустыри, земля',       tags: ['landscape','land'], category: 'geo' },
-  { id: 'building',    label: 'Здания',           hint: 'Жилые и нежилые постройки',  tags: ['building'],    category: 'geo' },
-  // Дороги
-  { id: 'road',        label: 'Дороги',           hint: 'Трассы, улицы',              tags: ['road'],        category: 'infra' },
-  { id: 'transit',     label: 'Транзит',          hint: 'Ж/д, метро, маршруты',       tags: ['transit'],     category: 'infra' },
-  { id: 'admin',       label: 'Границы',          hint: 'Административные границы',   tags: ['admin'],       category: 'infra' },
-  // POI
-  { id: 'poi',         label: 'POI (все)',         hint: 'Все точки интереса',         tags: ['poi'],                     category: 'poi' },
-  { id: 'poi_food',    label: 'POI: Еда',          hint: 'Кафе, рестораны, магазины',  tags: ['food','poi-food'],         category: 'poi' },
-  { id: 'poi_health',  label: 'POI: Здоровье',     hint: 'Аптеки, больницы, клиники',  tags: ['poi-health','health'],     category: 'poi' },
-  { id: 'poi_edu',     label: 'POI: Образование',  hint: 'Школы, вузы',                tags: ['poi-education','education'],category: 'poi' },
-  { id: 'poi_sport',   label: 'POI: Спорт',        hint: 'Стадионы, залы',             tags: ['poi-sport','sport'],       category: 'poi' },
-  { id: 'poi_enter',   label: 'POI: Развлечения',  hint: 'Кино, театры, клубы',        tags: ['poi-entertainment'],       category: 'poi' },
-  // Подписи
-  { id: 'lbl_road',    label: 'Подписи дорог',     hint: 'Названия улиц',              tags: ['road'],        elements: 'label', category: 'label' },
-  { id: 'lbl_poi',     label: 'Подписи POI',       hint: 'Названия мест',              tags: ['poi'],         elements: 'label', category: 'label' },
-  { id: 'lbl_water',   label: 'Подписи воды',      hint: 'Названия водоёмов',          tags: ['water'],       elements: 'label', category: 'label' },
-  { id: 'lbl_admin',   label: 'Подписи городов',   hint: 'Город, район, страна',       tags: ['admin','country','locality'], elements: 'label', category: 'label' },
-];
+let map = null, schemeLayer = null, featuresLayer = null;
+let currentTheme = 'light';
+let clickMode = false;
+let markers = []; // {id, coords, color, label, mapObj, el}
+let routeFeature = null;
+let markerIdCounter = 0;
+let YMapMarkerClass = null;
+let YMapFeatureClass = null;
 
-// Цвета для кастомизации
-const COLOR_DEFS = [
-  { id: 'c_water',      label: 'Цвет воды',        tags: ['water'],     elements: 'geometry', defaultLight: '#a8d8ea', defaultDark: '#1a3a4a' },
-  { id: 'c_veg',        label: 'Цвет зелени',      tags: ['vegetation'],elements: 'geometry', defaultLight: '#c8e6c9', defaultDark: '#1b3320' },
-  { id: 'c_road',       label: 'Цвет дорог',       tags: ['road'],      elements: 'geometry', defaultLight: '#ffffff', defaultDark: '#3a3a3a' },
-  { id: 'c_building',   label: 'Цвет зданий',      tags: ['building'],  elements: 'geometry', defaultLight: '#e0d9d0', defaultDark: '#2a2a35' },
-  { id: 'c_land',       label: 'Фон земли',        tags: ['landscape','land'], elements: 'geometry', defaultLight: '#f5f0e8', defaultDark: '#111118' },
-];
+// --- LOG ---
+function log(msg, type) {
+  const el = document.getElementById('log');
+  const line = document.createElement('span');
+  line.className = 'log-line' + (type ? ' ' + type : '');
+  const ts = new Date().toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  line.textContent = '[' + ts + '] ' + msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
 
-// State
-const state = {
-  visibility: {},   // layerId -> bool
-  colors: {},       // colorId -> hex string
-  customIconUrl: null,
-  customIconName: 'по умолчанию',
-  tool: 'nav',
-  markers: [],      // {coords, element, marker}
-  routeLayer: null,
-  currentExportTab: 'json',
-};
-
-// Init all on
-LAYERS.forEach(l => state.visibility[l.id] = true);
-COLOR_DEFS.forEach(c => {
-  state.colors[c.id] = c.defaultLight; // defaults; will update after theme
-});
-
-// =============================================
-// MAP INIT
-// =============================================
-let map, schemeLayer, featuresLayer;
-
+// --- INIT ---
 async function initMap() {
-  await ymaps3.ready;
-  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapControls, YMapMarker, YMapFeature, YMapLayer } = ymaps3;
-  window.YMapMarker = YMapMarker;
-  window.YMapFeature = YMapFeature;
-  window.YMapLayer = YMapLayer;
+  try {
+    await ymaps3.ready;
+    const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapFeature, YMapListener } = ymaps3;
+    YMapMarkerClass = YMapMarker;
+    YMapFeatureClass = YMapFeature;
 
-  const { YMapZoomControl } = await ymaps3.import('@yandex/ymaps3-controls@0.0.1').catch(() => ({ YMapZoomControl: null }));
-
-  map = new YMap(document.getElementById('map'), {
-    location: { center: [37.617698, 55.755864], zoom: 12 }
-  });
-
-  schemeLayer = new YMapDefaultSchemeLayer({ theme: 'light', customization: buildCustomization() });
-  featuresLayer = new YMapDefaultFeaturesLayer();
-  map.addChild(schemeLayer);
-  map.addChild(featuresLayer);
-
-  if (YMapZoomControl) {
-    const controls = new YMapControls({ position: 'right' });
-    controls.addChild(new YMapZoomControl());
-    map.addChild(controls);
-  }
-
-  map.addListener('click', onMapClick);
-
-  buildUI();
-}
-
-// =============================================
-// UI BUILDER
-// =============================================
-function buildUI() {
-  buildLayerToggles();
-  buildColorPickers();
-  updateMarkerList();
-}
-
-function buildLayerToggles() {
-  const container = document.getElementById('layerToggles');
-  const categories = [
-    { id: 'geo',   title: '🌍 Геометрия' },
-    { id: 'infra', title: '🏙 Инфраструктура' },
-    { id: 'poi',   title: '📌 POI' },
-    { id: 'label', title: '🔤 Подписи' },
-  ];
-  container.innerHTML = '';
-  categories.forEach(cat => {
-    const catLayers = LAYERS.filter(l => l.category === cat.id);
-    if (!catLayers.length) return;
-    const title = document.createElement('div');
-    title.style.cssText = 'font-size:8px;color:var(--text-dim);letter-spacing:0.08em;padding:4px 8px 2px;text-transform:uppercase;';
-    title.textContent = cat.title;
-    container.appendChild(title);
-    catLayers.forEach(layer => {
-      const row = document.createElement('div');
-      row.className = 'toggle-row on';
-      row.id = 'row_' + layer.id;
-      row.innerHTML = `
-        <div class="toggle-label">${layer.label}<small>${layer.hint}</small></div>
-        <div class="toggle-dot"></div>
-      `;
-      row.onclick = () => toggleLayer(layer.id, row);
-      container.appendChild(row);
+    map = new YMap(document.getElementById('map'), {
+      location: { center: [37.6176, 55.7558], zoom: 12 }
     });
-  });
+
+    schemeLayer = new YMapDefaultSchemeLayer({ theme: 'light', customization: [] });
+    featuresLayer = new YMapDefaultFeaturesLayer();
+    map.addChild(schemeLayer);
+    map.addChild(featuresLayer);
+
+    // клик на карту
+    const listener = new YMapListener({
+      layer: 'any',
+      onClick: (obj, event) => {
+        if (!clickMode) return;
+        const coords = event.coordinates;
+        if (coords) addMarkerAtCoords(coords);
+      }
+    });
+    map.addChild(listener);
+
+    log('Map v3 готова', 'ok');
+  } catch(e) {
+    log('Ошибка: ' + e.message, 'err');
+  }
 }
 
-function buildColorPickers() {
-  const container = document.getElementById('colorPickers');
-  container.innerHTML = '';
-  // Update defaults based on theme
-  const isDark = document.getElementById('themeSelect').value === 'dark';
-  COLOR_DEFS.forEach(c => {
-    if (!(c.id in state.colors) || state.colors[c.id] === c.defaultLight || state.colors[c.id] === c.defaultDark) {
-      state.colors[c.id] = isDark ? c.defaultDark : c.defaultLight;
-    }
-    const row = document.createElement('div');
-    row.className = 'color-row';
-    const hex = state.colors[c.id];
-    row.innerHTML = `
-      <label>${c.label}</label>
-      <input type="color" id="cp_${c.id}" value="${hex}" onchange="onColorChange('${c.id}', this.value)">
-      <input class="hex-input" type="text" id="ct_${c.id}" value="${hex}" maxlength="7"
-        onchange="onColorChangeHex('${c.id}', this.value)" onblur="onColorChangeHex('${c.id}', this.value)">
+// --- CLICK MODE ---
+function toggleClickMode() {
+  clickMode = !clickMode;
+  const btn = document.getElementById('click-mode-btn');
+  const hint = document.getElementById('map-hint');
+  if (clickMode) {
+    btn.textContent = 'режим клика: вкл';
+    btn.className = 'btn btn-active';
+    hint.classList.add('visible');
+  } else {
+    btn.textContent = 'режим клика: выкл';
+    btn.className = 'btn btn-secondary';
+    hint.classList.remove('visible');
+  }
+}
+
+// --- MARKERS ---
+function makeMarkerEl(color, label) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; cursor:pointer;';
+
+  const pin = document.createElement('div');
+  pin.style.cssText = `
+    width: 28px; height: 28px; border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: ${color};
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  `;
+  wrap.appendChild(pin);
+
+  if (label) {
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `
+      margin-top: 4px; font-size: 10px; font-family: monospace;
+      background: rgba(0,0,0,0.65); color: #fff;
+      padding: 2px 6px; border-radius: 10px; white-space: nowrap;
     `;
-    container.appendChild(row);
-  });
-}
-
-// =============================================
-// CUSTOMIZATION BUILDER
-// =============================================
-function buildCustomization() {
-  const rules = [];
-  LAYERS.forEach(layer => {
-    if (!state.visibility[layer.id]) {
-      const elements = layer.elements || 'geometry';
-      layer.tags.forEach(tag => {
-        rules.push({
-          tags: { any: [tag] },
-          elements,
-          stylers: [{ visibility: 'off' }]
-        });
-      });
-    }
-  });
-  // Also apply visibility:off for label sub-layers even when geometry is on
-  LAYERS.filter(l => l.elements === 'label' && !state.visibility[l.id]).forEach(layer => {
-    layer.tags.forEach(tag => {
-      rules.push({ tags: { any: [tag] }, elements: 'label', stylers: [{ visibility: 'off' }] });
-    });
-  });
-  // Color overrides
-  COLOR_DEFS.forEach(c => {
-    c.tags.forEach(tag => {
-      rules.push({ tags: { any: [tag] }, elements: c.elements, stylers: [{ color: state.colors[c.id] }] });
-    });
-  });
-  return rules;
-}
-
-function applyStyle() {
-  if (!schemeLayer) return;
-  const theme = document.getElementById('themeSelect').value;
-  // Reset color defaults when theme switches
-  COLOR_DEFS.forEach(c => {
-    state.colors[c.id] = theme === 'dark' ? c.defaultDark : c.defaultLight;
-    const cp = document.getElementById('cp_' + c.id);
-    const ct = document.getElementById('ct_' + c.id);
-    if (cp) cp.value = state.colors[c.id];
-    if (ct) ct.value = state.colors[c.id];
-  });
-  schemeLayer.update({ theme, customization: buildCustomization() });
-}
-
-// =============================================
-// LAYER TOGGLES
-// =============================================
-function toggleLayer(id, row) {
-  state.visibility[id] = !state.visibility[id];
-  row.classList.toggle('on', state.visibility[id]);
-  if (schemeLayer) {
-    schemeLayer.update({ customization: buildCustomization() });
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
   }
+  return wrap;
 }
 
-function onColorChange(id, val) {
-  state.colors[id] = val;
-  const ct = document.getElementById('ct_' + id);
-  if (ct) ct.value = val;
-  if (schemeLayer) schemeLayer.update({ customization: buildCustomization() });
+function addMarkerAtCoords(coords) {
+  const color = document.getElementById('marker-color').value;
+  const label = document.getElementById('marker-label').value.trim();
+  _addMarker(coords, color, label);
 }
 
-function onColorChangeHex(id, val) {
-  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-    state.colors[id] = val;
-    const cp = document.getElementById('cp_' + id);
-    if (cp) cp.value = val;
-    if (schemeLayer) schemeLayer.update({ customization: buildCustomization() });
+function addMarkerManual() {
+  const raw = document.getElementById('manual-coords').value.trim();
+  if (!raw) return;
+  const parts = raw.split(',').map(s => parseFloat(s.trim()));
+  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+    log('Неверный формат координат', 'err'); return;
   }
+  const color = document.getElementById('marker-color').value;
+  const label = document.getElementById('marker-label').value.trim();
+  _addMarker(parts, color, label);
 }
 
-// =============================================
-// MARKER TOOLS
-// =============================================
-function loadMarkerIcon(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    state.customIconUrl = e.target.result;
-    state.customIconName = file.name;
-    document.getElementById('iconName').textContent = file.name;
-  };
-  reader.readAsDataURL(file);
+function _addMarker(coords, color, label) {
+  if (!map || !YMapMarkerClass) return;
+  const id = ++markerIdCounter;
+  const el = makeMarkerEl(color, label || ('#' + id));
+  const markerObj = new YMapMarkerClass({
+    coordinates: coords,
+    draggable: false
+  }, el);
+  map.addChild(markerObj);
+  const m = { id, coords, color, label: label || ('#' + id), mapObj: markerObj, el };
+  markers.push(m);
+  renderMarkerList();
+  updateRouteMarkerBtns();
+  log('маркер #' + id + ' → [' + coords.map(v=>v.toFixed(4)) + ']', 'info');
 }
 
-function togglePlaceMode() {
-  setTool(state.tool === 'place' ? 'nav' : 'place');
+function removeMarker(id) {
+  const idx = markers.findIndex(m => m.id === id);
+  if (idx === -1) return;
+  try { map.removeChild(markers[idx].mapObj); } catch(e){}
+  markers.splice(idx, 1);
+  renderMarkerList();
+  updateRouteMarkerBtns();
 }
 
-function setTool(tool) {
-  state.tool = tool;
-  const placeBtn = document.getElementById('placeBtn');
-  const navBtn = document.getElementById('navBtn');
-  const placeToolBtn = document.getElementById('placeToolBtn');
-  const toolLabel = document.getElementById('toolLabel');
-  const mapEl = document.getElementById('map');
-
-  if (tool === 'place') {
-    placeBtn.textContent = '✕ Отмена';
-    placeBtn.style.background = 'var(--red)';
-    navBtn.classList.remove('active');
-    placeToolBtn.classList.add('active', 'active-place');
-    navBtn.classList.remove('active');
-    mapEl.style.cursor = 'crosshair';
-    toolLabel.textContent = 'Поставить маркер';
-  } else {
-    placeBtn.textContent = '+ Поставить маркер';
-    placeBtn.style.background = '';
-    placeToolBtn.classList.remove('active', 'active-place');
-    navBtn.classList.add('active');
-    mapEl.style.cursor = '';
-    toolLabel.textContent = 'Навигация';
-  }
+function clearAllMarkers() {
+  markers.forEach(m => { try { map.removeChild(m.mapObj); } catch(e){} });
+  markers = [];
+  renderMarkerList();
+  updateRouteMarkerBtns();
+  log('все маркеры удалены');
 }
 
-function onMapClick(obj) {
-  if (state.tool !== 'place') return;
-  const coords = obj.coordinates;
-  addMarker(coords);
-  setTool('nav');
-}
-
-function addMarker(coords) {
-  const el = document.createElement('div');
-  el.style.cssText = 'position:relative;cursor:pointer;';
-  const idx = state.markers.length;
-
-  if (state.customIconUrl) {
-    const img = document.createElement('img');
-    img.src = state.customIconUrl;
-    img.style.cssText = 'width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));';
-    el.appendChild(img);
-  } else {
-    // Default SVG pin
-    el.innerHTML = `<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 0C6.27 0 0 6.27 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.27 21.73 0 14 0Z" fill="${idx % 2 === 0 ? '#7c3aed' : '#06b6d4'}"/>
-      <circle cx="14" cy="14" r="6" fill="white"/>
-      <text x="14" y="18" text-anchor="middle" font-size="10" font-weight="bold" fill="${idx % 2 === 0 ? '#7c3aed' : '#06b6d4'}" font-family="JetBrains Mono, monospace">${idx + 1}</text>
-    </svg>`;
-  }
-
-  const { YMapMarker } = window;
-  if (!YMapMarker) return;
-
-  const marker = new YMapMarker({ coordinates: coords, draggable: true }, el);
-  marker.addListener('dragend', () => updateRouteInfo());
-  map.addChild(marker);
-  state.markers.push({ coords, element: el, marker });
-  updateMarkerList();
-  updateRouteInfo();
-  document.getElementById('markerCount').textContent = state.markers.length;
-}
-
-function removeMarker(idx) {
-  const m = state.markers[idx];
-  if (m) { map.removeChild(m.marker); }
-  state.markers.splice(idx, 1);
-  clearRoute();
-  updateMarkerList();
-  updateRouteInfo();
-  document.getElementById('markerCount').textContent = state.markers.length;
-}
-
-function clearMarkers() {
-  state.markers.forEach(m => map.removeChild(m.marker));
-  state.markers = [];
-  clearRoute();
-  updateMarkerList();
-  updateRouteInfo();
-  document.getElementById('markerCount').textContent = 0;
-}
-
-function updateMarkerList() {
-  const list = document.getElementById('markerList');
-  if (!state.markers.length) { list.innerHTML = ''; return; }
-  list.innerHTML = state.markers.map((m, i) => `
-    <div class="marker-item">
-      <div class="mi-icon">${state.customIconUrl
-        ? `<img src="${state.customIconUrl}">`
-        : `<svg width="20" height="20" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.27 21.73 0 14 0Z" fill="${i%2===0?'#7c3aed':'#06b6d4'}"/><text x="14" y="19" text-anchor="middle" font-size="12" font-weight="bold" fill="white" font-family="Arial">${i+1}</text></svg>`
-      }</div>
-      <div class="mi-coords">${m.coords[0].toFixed(4)}, ${m.coords[1].toFixed(4)}</div>
-      <div class="mi-del" onclick="removeMarker(${i})">✕</div>
-    </div>
-  `).join('');
-}
-
-// =============================================
-// ROUTE
-// =============================================
-async function buildRoute() {
-  if (state.markers.length < 2) {
-    document.getElementById('routeInfo').innerHTML = '<span style="color:var(--red)">Нужно ≥ 2 маркера для маршрута.</span>';
+function renderMarkerList() {
+  const list = document.getElementById('marker-list');
+  document.getElementById('marker-count').textContent = markers.length;
+  list.innerHTML = '';
+  if (markers.length === 0) {
+    list.innerHTML = '<span style="font-size:11px;color:#aaa;">пока нет маркеров</span>';
     return;
   }
-  clearRoute();
-  document.getElementById('routeInfo').innerHTML = '⏳ Строю маршрут...';
-
-  try {
-    const type = document.getElementById('routeType').value;
-    const waypoints = state.markers.map(m => ({ type: 'waypoint', coordinates: m.coords }));
-    const route = await ymaps3.route({ points: waypoints, type });
-
-    if (!route || !route.toRoute) {
-      document.getElementById('routeInfo').innerHTML = '<span style="color:var(--red)">Маршрут не найден.</span>';
-      return;
-    }
-
-    const routeObj = route.toRoute();
-    map.addChild(routeObj);
-    state.routeLayer = routeObj;
-
-    const dist = route.distance?.text || '?';
-    const dur  = route.duration?.text || '?';
-    document.getElementById('routeInfo').innerHTML =
-      `<b>Маршрут построен</b><br>Расстояние: <b>${dist}</b><br>Время: <b>${dur}</b>`;
-  } catch (e) {
-    // Fallback: draw polyline
-    drawFallbackRoute();
-  }
+  markers.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'marker-item';
+    item.innerHTML = `
+      <div class="marker-dot" style="background:${m.color}"></div>
+      <span class="marker-coords">${m.label} [${m.coords[0].toFixed(3)}, ${m.coords[1].toFixed(3)}]</span>
+      <button class="marker-del" onclick="removeMarker(${m.id})">✕</button>
+    `;
+    list.appendChild(item);
+  });
 }
 
-function drawFallbackRoute() {
+function updateRouteMarkerBtns() {
+  const wrap = document.getElementById('route-marker-btns');
+  const hint = document.getElementById('route-markers-hint');
+  wrap.innerHTML = '';
+  if (markers.length === 0) {
+    hint.style.display = 'block';
+    return;
+  }
+  hint.style.display = 'none';
+  markers.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-secondary';
+    btn.style.cssText = 'display:flex; align-items:center; gap:6px; text-align:left;';
+    btn.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label}`;
+    btn.onclick = () => {
+      const fromEl = document.getElementById('route-from');
+      const toEl = document.getElementById('route-to');
+      if (!fromEl.value) {
+        fromEl.value = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
+        log('Откуда → ' + m.label, 'info');
+      } else {
+        toEl.value = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
+        log('Куда → ' + m.label, 'info');
+      }
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+// --- ROUTE ---
+async function buildRoute() {
+  if (!map) return;
+  const fromRaw = document.getElementById('route-from').value.trim();
+  const toRaw = document.getElementById('route-to').value.trim();
+  const type = document.getElementById('route-type').value;
+
+  if (!fromRaw || !toRaw) { log('Укажи обе точки маршрута', 'err'); return; }
+
+  const from = fromRaw.split(',').map(s => parseFloat(s.trim()));
+  const to = toRaw.split(',').map(s => parseFloat(s.trim()));
+
+  if (from.length < 2 || to.length < 2) { log('Неверный формат координат', 'err'); return; }
+
+  clearRoute();
+  log('строю маршрут (' + type + ')...', 'muted');
+
   try {
-    const { YMapFeature } = window;
-    if (!YMapFeature) return;
-    const coords = state.markers.map(m => m.coords);
-    const feature = new YMapFeature({
-      id: 'route',
-      geometry: { type: 'LineString', coordinates: coords },
-      style: { stroke: [{ color: '#7c3aed', width: 4, opacity: 0.9 }] }
+    const { route } = await ymaps3.route({
+      points: [from, to],
+      type: type,
     });
-    map.addChild(feature);
-    state.routeLayer = feature;
-    const pts = state.markers.length;
-    document.getElementById('routeInfo').innerHTML =
-      `<b>Маршрут (прямая линия)</b><br>Точек: <b>${pts}</b><br><small style="color:var(--text-dim)">Для полного маршрута нужен ключ с HTTP Referer</small>`;
+
+    if (!route) { log('Маршрут не найден', 'err'); return; }
+
+    const geometry = route.toRoute().geometry;
+
+    routeFeature = new YMapFeatureClass({
+      geometry,
+      style: {
+        stroke: [{ color: type === 'pedestrian' ? '#378ADD' : type === 'driving' ? '#e34a30' : '#27ae60', width: 4 }],
+        simplificationRate: 0
+      }
+    });
+    map.addChild(routeFeature);
+
+    // инфо о маршруте
+    const props = route.toRoute().properties || {};
+    const info = document.getElementById('route-info');
+    let infoText = '✓ маршрут построен';
+    if (props.duration) infoText += ' · ' + Math.round(props.duration / 60) + ' мин';
+    if (props.distance) infoText += ' · ' + (props.distance / 1000).toFixed(1) + ' км';
+    info.textContent = infoText;
+    info.className = 'route-info visible';
+
+    log('маршрут готов', 'ok');
   } catch(e) {
-    document.getElementById('routeInfo').innerHTML = `<span style="color:var(--red)">Ошибка: ${e.message}</span>`;
+    log('Ошибка маршрута: ' + e.message, 'err');
   }
 }
 
 function clearRoute() {
-  if (state.routeLayer) {
-    try { map.removeChild(state.routeLayer); } catch(e) {}
-    state.routeLayer = null;
+  if (routeFeature && map) {
+    try { map.removeChild(routeFeature); } catch(e){}
+    routeFeature = null;
   }
-  updateRouteInfo();
+  document.getElementById('route-info').className = 'route-info';
 }
 
-function updateRouteInfo() {
-  if (!state.routeLayer) {
-    const n = state.markers.length;
-    document.getElementById('routeInfo').innerHTML =
-      n < 2
-        ? `Поставьте ≥ 2 маркера, чтобы построить маршрут.`
-        : `<b>${n}</b> маркера(ов) готовы. Нажмите <b>Построить</b>.`;
+// --- STYLES ---
+function buildCustomization() {
+  const styles = [];
+  const g = id => document.getElementById(id).checked;
+  if (!g('tog-poi')) {
+    styles.push({ tags: { all: ['poi'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+    styles.push({ tags: { all: ['poi'] }, elements: 'label', stylers: [{ opacity: 0 }] });
+  } else {
+    if (!g('tog-poi-icons')) styles.push({ tags: { all: ['poi'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+    if (!g('tog-poi-labels')) styles.push({ tags: { all: ['poi'] }, elements: 'label', stylers: [{ opacity: 0 }] });
   }
+  if (!g('tog-transit')) {
+    styles.push({ tags: { all: ['transit_location'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+    styles.push({ tags: { all: ['transit_location'] }, elements: 'label', stylers: [{ opacity: 0 }] });
+  }
+  if (!g('tog-road')) {
+    styles.push({ tags: { all: ['road'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+    styles.push({ tags: { all: ['road'] }, elements: 'label', stylers: [{ opacity: 0 }] });
+  }
+  if (!g('tog-structure')) styles.push({ tags: { all: ['structure'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+  if (!g('tog-water')) styles.push({ tags: { all: ['water'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+  if (!g('tog-vegetation')) styles.push({ tags: { all: ['vegetation'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+  return styles;
 }
 
-// =============================================
-// EXPORT
-// =============================================
-function buildJsonExport() {
-  return JSON.stringify(buildCustomization(), null, 2);
+function applyStyles() {
+  if (!schemeLayer) return;
+  const styles = buildCustomization();
+  schemeLayer.update({ customization: styles, theme: currentTheme });
+  log('стили обновлены (' + styles.length + ' правил)', 'info');
 }
 
-function buildHtmlExport() {
-  const theme = document.getElementById('themeSelect').value;
-  const customization = buildCustomization();
-  const markers = state.markers.map(m => `  [${m.coords[0]}, ${m.coords[1]}]`).join(',\n');
-  return `<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>Яндекс Карта</title>
-  <script src="https://api-maps.yandex.ru/v3/?apikey=ВАSH_API_KEY&lang=ru_RU"><\/script>
-  <style>
-    html, body { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100%; height: 100vh; }
-  <\/style>
-</head>
-<body>
-<div id="map"></div>
-<script>
-async function initMap() {
-  await ymaps3.ready;
-  const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker } = ymaps3;
+function setTheme(t) { currentTheme = t; applyStyles(); log('theme → ' + t, 'info'); }
 
-  const customization = ${JSON.stringify(customization, null, 2)};
+function exportStyles() {
+  const json = JSON.stringify(buildCustomization(), null, 2);
+  navigator.clipboard.writeText(json)
+    .then(() => log('скопировано в буфер', 'ok'))
+    .catch(() => { console.log(json); log('JSON в консоли (F12)', 'info'); });
+}
 
-  const map = new YMap(document.getElementById('map'), {
-    location: { center: [37.617698, 55.755864], zoom: 12 }
+// --- TABS ---
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['markers','route','style'][i] === name);
   });
-
-  map.addChild(new YMapDefaultSchemeLayer({ theme: '${theme}', customization }));
-  map.addChild(new YMapDefaultFeaturesLayer());
-
-  // Маркеры
-  const markerCoords = [
-${markers}
-  ];
-
-  markerCoords.forEach((coords, i) => {
-    const el = document.createElement('div');
-    el.innerHTML = \`<svg width="28" height="36" viewBox="0 0 28 36" fill="none">
-      <path d="M14 0C6.27 0 0 6.27 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.27 21.73 0 14 0Z" fill="#7c3aed"/>
-      <circle cx="14" cy="14" r="6" fill="white"/>
-    </svg>\`;
-    map.addChild(new YMapMarker({ coordinates: coords }, el));
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + name);
   });
 }
-initMap();
-<\/script>
-</body>
-</html>`;
-}
 
-let _exportMode = 'json';
-function exportModal(mode) {
-  _exportMode = mode;
-  document.getElementById('exportModal').classList.add('show');
-  document.getElementById('exportTitle').textContent = mode === 'json' ? 'Экспорт стиля JSON' : 'Экспорт HTML кода';
-  switchTab(mode);
-}
-
-function switchTab(tab) {
-  _exportMode = tab;
-  document.getElementById('tabJson').classList.toggle('active', tab === 'json');
-  document.getElementById('tabHtml').classList.toggle('active', tab === 'html');
-  document.getElementById('exportCode').value = tab === 'json' ? buildJsonExport() : buildHtmlExport();
-}
-
-function closeModal() {
-  document.getElementById('exportModal').classList.remove('show');
-}
-
-function copyExport() {
-  const ta = document.getElementById('exportCode');
-  ta.select();
-  document.execCommand('copy');
-  // Flash feedback
-  const btn = event.target;
-  btn.textContent = '✓ Скопировано!';
-  setTimeout(() => btn.textContent = '📋 Копировать', 1500);
-}
-
-function downloadExport() {
-  const content = document.getElementById('exportCode').value;
-  const ext = _exportMode === 'json' ? 'json' : 'html';
-  const mime = _exportMode === 'json' ? 'application/json' : 'text/html';
-  const blob = new Blob([content], { type: mime });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `ymap3-style.${ext}`;
-  a.click();
-}
-
-// =============================================
-// UI HELPERS
-// =============================================
-function toggleSection(header) {
-  header.classList.toggle('collapsed');
-  const body = header.nextElementSibling;
-  body.classList.toggle('hidden');
-}
-
-// =============================================
-// START
-// =============================================
-initMap();
+// --- START ---
+window.addEventListener('load', function() {
+  if (typeof ymaps3 === 'undefined') {
+    document.getElementById('log').innerHTML = '<span class="log-line err">Яндекс API не загрузился. Проверь соединение и что открыто через localhost.</span>';
+    return;
+  }
+  ymaps3.ready.then(function() { initMap(); }).catch(function(e) {
+    document.getElementById('log').innerHTML = '<span class="log-line err">Ошибка: ' + e.message + '</span>';
+  });
+});
 </script>
 </body>
 </html>
