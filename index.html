@@ -40,10 +40,9 @@ body { font-family: monospace; background: #1a1a1a; color: #eee; display: flex; 
 .panel::-webkit-scrollbar-track { background: #222; }
 .panel::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
 
-.group { margin-bottom: 2px; }
 .group-header {
   font-size: 9px; color: #555; text-transform: uppercase;
-  letter-spacing: 0.08em; padding: 8px 4px 4px;
+  letter-spacing: 0.08em; padding: 10px 4px 4px;
 }
 
 .toggle-row {
@@ -51,8 +50,12 @@ body { font-family: monospace; background: #1a1a1a; color: #eee; display: flex; 
   padding: 4px 6px; border-radius: 4px; transition: background 0.1s;
 }
 .toggle-row:hover { background: #2a2a2a; }
+.toggle-row.sub {
+  padding-left: 18px;
+}
 .toggle-info { flex: 1; min-width: 0; }
 .toggle-label { font-size: 11px; color: #ccc; }
+.toggle-label.dim { color: #888; font-size: 10px; }
 .toggle-sub { font-size: 9px; color: #555; font-family: monospace; }
 
 .toggle { position: relative; width: 28px; height: 16px; flex-shrink: 0; margin-left: 8px; }
@@ -161,64 +164,85 @@ select.field-input { cursor: pointer; }
 
   <!-- СЛОИ -->
   <div class="panel active" id="panel-style">
-
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="setTheme('light')">☀ light</button>
-      <button class="btn btn-ghost" onclick="setTheme('dark')">☾ dark</button>
-      <button class="btn btn-ghost" onclick="allOn()">все вкл</button>
-      <button class="btn btn-ghost" onclick="allOff()">все выкл</button>
+      <button class="btn btn-ghost" onclick="setTheme('light')">☀ день</button>
+      <button class="btn btn-ghost" onclick="setTheme('dark')">☾ ночь</button>
+      <button class="btn btn-ghost" onclick="allOn()">вкл всё</button>
+      <button class="btn btn-ghost" onclick="allOff()">выкл всё</button>
     </div>
 
-    <div class="group">
-      <div class="group-header">📌 POI — точки интереса</div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все POI</div><div class="toggle-sub">poi</div></div><label class="toggle"><input type="checkbox" data-tag="poi" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Еда и кафе</div><div class="toggle-sub">food / poi-food</div></div><label class="toggle"><input type="checkbox" data-tag="food" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Здоровье</div><div class="toggle-sub">health / poi-health</div></div><label class="toggle"><input type="checkbox" data-tag="health" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Образование</div><div class="toggle-sub">education / poi-education</div></div><label class="toggle"><input type="checkbox" data-tag="education" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Спорт</div><div class="toggle-sub">sport / poi-sport</div></div><label class="toggle"><input type="checkbox" data-tag="sport" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Развлечения</div><div class="toggle-sub">poi-entertainment</div></div><label class="toggle"><input type="checkbox" data-tag="poi-entertainment" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Парки (иконки)</div><div class="toggle-sub">poi-park</div></div><label class="toggle"><input type="checkbox" data-tag="poi-park" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Культура</div><div class="toggle-sub">poi-culture</div></div><label class="toggle"><input type="checkbox" data-tag="poi-culture" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Финансы</div><div class="toggle-sub">poi-finance</div></div><label class="toggle"><input type="checkbox" data-tag="poi-finance" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Магазины</div><div class="toggle-sub">poi-shopping</div></div><label class="toggle"><input type="checkbox" data-tag="poi-shopping" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Транспортные хабы</div><div class="toggle-sub">poi-transport</div></div><label class="toggle"><input type="checkbox" data-tag="poi-transport" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Религия</div><div class="toggle-sub">poi-religion</div></div><label class="toggle"><input type="checkbox" data-tag="poi-religion" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Гостиницы</div><div class="toggle-sub">poi-hotel</div></div><label class="toggle"><input type="checkbox" data-tag="poi-hotel" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Транспорт (остановки)</div><div class="toggle-sub">transit_location</div></div><label class="toggle"><input type="checkbox" data-tag="transit_location" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-    </div>
+    <!-- POI -->
+    <div class="group-header">📌 POI — точки интереса</div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все POI</div><div class="toggle-sub">poi</div></div><label class="toggle"><input type="checkbox" data-tag="poi" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Достопримечательности</div><div class="toggle-sub">poi › major_landmark</div></div><label class="toggle"><input type="checkbox" data-tag="major_landmark" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Еда и напитки</div><div class="toggle-sub">poi › food_and_drink</div></div><label class="toggle"><input type="checkbox" data-tag="food_and_drink" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Магазины / ТЦ</div><div class="toggle-sub">poi › shopping</div></div><label class="toggle"><input type="checkbox" data-tag="shopping" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Коммерч. услуги</div><div class="toggle-sub">poi › commercial_services</div></div><label class="toggle"><input type="checkbox" data-tag="commercial_services" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Заправки</div><div class="toggle-sub">poi › fuel_station</div></div><label class="toggle"><input type="checkbox" data-tag="fuel_station" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Гостиницы</div><div class="toggle-sub">poi › hotel</div></div><label class="toggle"><input type="checkbox" data-tag="hotel" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Медицина</div><div class="toggle-sub">poi › medical</div></div><label class="toggle"><input type="checkbox" data-tag="medical" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Парки / пляжи (POI)</div><div class="toggle-sub">poi › outdoor</div></div><label class="toggle"><input type="checkbox" data-tag="outdoor" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Кладбища (POI)</div><div class="toggle-sub">poi › cemetery</div></div><label class="toggle"><input type="checkbox" data-tag="cemetery" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
 
     <div class="divider"></div>
 
-    <div class="group">
-      <div class="group-header">🏙 Инфраструктура</div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все дороги</div><div class="toggle-sub">road</div></div><label class="toggle"><input type="checkbox" data-tag="road" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Второстепенные дороги</div><div class="toggle-sub">road-minor</div></div><label class="toggle"><input type="checkbox" data-tag="road-minor" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Магистрали</div><div class="toggle-sub">road-major</div></div><label class="toggle"><input type="checkbox" data-tag="road-major" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Здания</div><div class="toggle-sub">building</div></div><label class="toggle"><input type="checkbox" data-tag="building" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Транспорт (метро, ж/д)</div><div class="toggle-sub">transit</div></div><label class="toggle"><input type="checkbox" data-tag="transit" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Железная дорога</div><div class="toggle-sub">railway</div></div><label class="toggle"><input type="checkbox" data-tag="railway" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-    </div>
+    <!-- ТРАНСПОРТ -->
+    <div class="group-header">🚇 Общественный транспорт</div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Всё — транспорт</div><div class="toggle-sub">transit</div></div><label class="toggle"><input type="checkbox" data-tag="transit" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Схема линий (на карте)</div><div class="toggle-sub">transit › transit_schema</div></div><label class="toggle"><input type="checkbox" data-tag="transit_schema" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Физические пути (ж/д, трамвай)</div><div class="toggle-sub">transit › transit_line</div></div><label class="toggle"><input type="checkbox" data-tag="transit_line" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Все точки транспорта</div><div class="toggle-sub">transit › transit_location</div></div><label class="toggle"><input type="checkbox" data-tag="transit_location" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Остановки наземного транспорта</div><div class="toggle-sub">transit › transit_stop</div></div><label class="toggle"><input type="checkbox" data-tag="transit_stop" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Входы в метро</div><div class="toggle-sub">transit › transit_entrance</div></div><label class="toggle"><input type="checkbox" data-tag="transit_entrance" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
 
     <div class="divider"></div>
 
-    <div class="group">
-      <div class="group-header">💧 Природа и ландшафт</div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Вода</div><div class="toggle-sub">water</div></div><label class="toggle"><input type="checkbox" data-tag="water" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Зелень</div><div class="toggle-sub">vegetation</div></div><label class="toggle"><input type="checkbox" data-tag="vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Ландшафт</div><div class="toggle-sub">landscape</div></div><label class="toggle"><input type="checkbox" data-tag="landscape" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Подложка земли</div><div class="toggle-sub">land</div></div><label class="toggle"><input type="checkbox" data-tag="land" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-    </div>
+    <!-- ДОРОГИ -->
+    <div class="group-header">🛣 Дороги</div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все дороги</div><div class="toggle-sub">road</div></div><label class="toggle"><input type="checkbox" data-tag="road" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Магистрали (road_1)</div><div class="toggle-sub">road_1</div></div><label class="toggle"><input type="checkbox" data-tag="road_1" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Основные дороги (road_2)</div><div class="toggle-sub">road_2</div></div><label class="toggle"><input type="checkbox" data-tag="road_2" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Второстепенные (road_3–4)</div><div class="toggle-sub">road_3</div></div><label class="toggle"><input type="checkbox" data-tag="road_3" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Внутриквартальные</div><div class="toggle-sub">road_minor</div></div><label class="toggle"><input type="checkbox" data-tag="road_minor" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Пешеходные / велодорожки</div><div class="toggle-sub">path</div></div><label class="toggle"><input type="checkbox" data-tag="path" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Строящиеся дороги</div><div class="toggle-sub">road_construction</div></div><label class="toggle"><input type="checkbox" data-tag="road_construction" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Светофоры</div><div class="toggle-sub">traffic_light</div></div><label class="toggle"><input type="checkbox" data-tag="traffic_light" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Переходы</div><div class="toggle-sub">crosswalk</div></div><label class="toggle"><input type="checkbox" data-tag="crosswalk" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
 
     <div class="divider"></div>
 
-    <div class="group">
-      <div class="group-header">🌍 Административное деление</div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Страны</div><div class="toggle-sub">country</div></div><label class="toggle"><input type="checkbox" data-tag="country" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Регионы / области</div><div class="toggle-sub">state</div></div><label class="toggle"><input type="checkbox" data-tag="state" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Районы города</div><div class="toggle-sub">district</div></div><label class="toggle"><input type="checkbox" data-tag="district" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Населённые пункты</div><div class="toggle-sub">locality</div></div><label class="toggle"><input type="checkbox" data-tag="locality" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все адм. объекты</div><div class="toggle-sub">admin</div></div><label class="toggle"><input type="checkbox" data-tag="admin" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-    </div>
+    <!-- СТРОЕНИЯ -->
+    <div class="group-header">🏙 Строения</div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Здания</div><div class="toggle-sub">building</div></div><label class="toggle"><input type="checkbox" data-tag="building" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Входы в здания</div><div class="toggle-sub">building › entrance</div></div><label class="toggle"><input type="checkbox" data-tag="entrance" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Заборы</div><div class="toggle-sub">fence</div></div><label class="toggle"><input type="checkbox" data-tag="fence" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+
+    <div class="divider"></div>
+
+    <!-- ПРИРОДА -->
+    <div class="group-header">💧 Природа и ландшафт</div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Вода</div><div class="toggle-sub">water</div></div><label class="toggle"><input type="checkbox" data-tag="water" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Ландшафт (всё)</div><div class="toggle-sub">landscape</div></div><label class="toggle"><input type="checkbox" data-tag="landscape" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Земная поверхность</div><div class="toggle-sub">land</div></div><label class="toggle"><input type="checkbox" data-tag="land" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Растительность / зелень</div><div class="toggle-sub">vegetation</div></div><label class="toggle"><input type="checkbox" data-tag="vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Жилые кварталы</div><div class="toggle-sub">residential</div></div><label class="toggle"><input type="checkbox" data-tag="residential" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Промзоны</div><div class="toggle-sub">industrial</div></div><label class="toggle"><input type="checkbox" data-tag="industrial" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Парки / сады (зоны)</div><div class="toggle-sub">park</div></div><label class="toggle"><input type="checkbox" data-tag="park" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Спортплощадки</div><div class="toggle-sub">sports_ground</div></div><label class="toggle"><input type="checkbox" data-tag="sports_ground" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Пляжи (зоны)</div><div class="toggle-sub">beach</div></div><label class="toggle"><input type="checkbox" data-tag="beach" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Нацпарки / заповедники</div><div class="toggle-sub">national_park</div></div><label class="toggle"><input type="checkbox" data-tag="national_park" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Стройплощадки</div><div class="toggle-sub">construction_site</div></div><label class="toggle"><input type="checkbox" data-tag="construction_site" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+
+    <div class="divider"></div>
+
+    <!-- АДМИН -->
+    <div class="group-header">🌍 Административное деление</div>
+    <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Всё адм. деление</div><div class="toggle-sub">admin</div></div><label class="toggle"><input type="checkbox" data-tag="admin" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Страны</div><div class="toggle-sub">admin › country</div></div><label class="toggle"><input type="checkbox" data-tag="country" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Регионы / области</div><div class="toggle-sub">admin › region</div></div><label class="toggle"><input type="checkbox" data-tag="region" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Населённые пункты</div><div class="toggle-sub">admin › locality</div></div><label class="toggle"><input type="checkbox" data-tag="locality" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Городские районы</div><div class="toggle-sub">admin › district</div></div><label class="toggle"><input type="checkbox" data-tag="district" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Адресные точки</div><div class="toggle-sub">admin › address</div></div><label class="toggle"><input type="checkbox" data-tag="address" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
 
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="exportStyles()">копировать JSON</button>
@@ -227,12 +251,10 @@ select.field-input { cursor: pointer; }
 
   <!-- МАРКЕРЫ -->
   <div class="panel" id="panel-markers">
-    <div class="hint-box">Включи режим клика и кликай на карту. Или введи координаты вручную.</div>
-
+    <div class="hint-box">Включи режим клика и кликай по карте. Или введи координаты вручную.</div>
     <div class="btn-row">
       <button class="btn btn-ghost" id="click-btn" onclick="toggleClickMode()">режим клика: выкл</button>
     </div>
-
     <div class="field-row">
       <span class="field-label">Цвет</span>
       <input type="color" id="marker-color" value="#5aabff" style="width:100%;height:30px;border:1px solid #333;border-radius:5px;cursor:pointer;padding:2px;background:#1a1a1a;">
@@ -249,7 +271,6 @@ select.field-input { cursor: pointer; }
       <button class="btn btn-primary" onclick="addMarkerManual()">добавить</button>
       <button class="btn btn-danger" onclick="clearAllMarkers()">удалить все</button>
     </div>
-
     <div class="group-header">на карте (<span id="marker-count">0</span>)</div>
     <div class="marker-list" id="marker-list">
       <span style="font-size:10px;color:#555;">пока нет маркеров</span>
@@ -259,7 +280,6 @@ select.field-input { cursor: pointer; }
   <!-- МАРШРУТ -->
   <div class="panel" id="panel-route">
     <div class="hint-box">Добавь маркеры и нажми на них чтобы выбрать точки маршрута.</div>
-
     <div class="field-row">
       <span class="field-label">Откуда (lon, lat)</span>
       <input class="field-input" id="route-from" placeholder="37.6176, 55.7558">
@@ -280,9 +300,7 @@ select.field-input { cursor: pointer; }
       <button class="btn btn-primary" onclick="buildRoute()">построить</button>
       <button class="btn btn-ghost" onclick="clearRoute()">очистить</button>
     </div>
-
     <div class="route-info" id="route-info"></div>
-
     <div class="group-header" style="padding-top:8px;">из маркеров</div>
     <div id="route-marker-btns" style="display:flex;flex-direction:column;gap:3px;padding:4px;">
       <span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>
@@ -341,7 +359,6 @@ async function initMap() {
       }
     });
     map.addChild(listener);
-
     log('Map v3 готова', 'ok');
   } catch(e) {
     log('Ошибка init: ' + e.message, 'err');
@@ -365,29 +382,18 @@ function applyStyles() {
   if (!schemeLayer) return;
   const styles = buildCustomization();
   schemeLayer.update({ customization: styles, theme: currentTheme });
-  log('стили: ' + styles.length / 2 + ' скрытых слоёв', 'info');
+  const hidden = styles.length / 2;
+  log('скрыто слоёв: ' + hidden, hidden > 0 ? 'info' : 'ok');
 }
 
-function setTheme(t) {
-  currentTheme = t;
-  applyStyles();
-  log('тема → ' + t, 'info');
-}
-
-function allOn() {
-  document.querySelectorAll('[data-tag]').forEach(i => i.checked = true);
-  applyStyles();
-}
-
-function allOff() {
-  document.querySelectorAll('[data-tag]').forEach(i => i.checked = false);
-  applyStyles();
-}
+function setTheme(t) { currentTheme = t; applyStyles(); log('тема → ' + t, 'info'); }
+function allOn()  { document.querySelectorAll('[data-tag]').forEach(i => i.checked = true);  applyStyles(); }
+function allOff() { document.querySelectorAll('[data-tag]').forEach(i => i.checked = false); applyStyles(); }
 
 function exportStyles() {
   const json = JSON.stringify(buildCustomization(), null, 2);
   navigator.clipboard.writeText(json)
-    .then(() => log('JSON скопирован в буфер', 'ok'))
+    .then(() => log('JSON скопирован', 'ok'))
     .catch(() => { console.log(json); log('JSON в консоли (F12)', 'info'); });
 }
 
@@ -418,9 +424,7 @@ function addMarkerManual() {
   if (!raw) return;
   const parts = raw.split(',').map(s => parseFloat(s.trim()));
   if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) { log('неверные координаты', 'err'); return; }
-  const color = document.getElementById('marker-color').value;
-  const label = document.getElementById('marker-label').value.trim();
-  _addMarker(parts, color, label);
+  _addMarker(parts, document.getElementById('marker-color').value, document.getElementById('marker-label').value.trim());
 }
 
 function _addMarker(coords, color, label) {
@@ -433,7 +437,7 @@ function _addMarker(coords, color, label) {
   markers.push({ id, coords, color, label: displayLabel, mapObj: obj });
   renderMarkerList();
   updateRouteMarkerBtns();
-  log('маркер ' + displayLabel + ' → [' + coords[0].toFixed(4) + ', ' + coords[1].toFixed(4) + ']', 'info');
+  log('маркер ' + displayLabel + ' [' + coords[0].toFixed(4) + ', ' + coords[1].toFixed(4) + ']', 'info');
 }
 
 function removeMarker(id) {
@@ -441,15 +445,13 @@ function removeMarker(id) {
   if (idx === -1) return;
   try { map.removeChild(markers[idx].mapObj); } catch(e){}
   markers.splice(idx, 1);
-  renderMarkerList();
-  updateRouteMarkerBtns();
+  renderMarkerList(); updateRouteMarkerBtns();
 }
 
 function clearAllMarkers() {
   markers.forEach(m => { try { map.removeChild(m.mapObj); } catch(e){} });
   markers = [];
-  renderMarkerList();
-  updateRouteMarkerBtns();
+  renderMarkerList(); updateRouteMarkerBtns();
   log('маркеры удалены');
 }
 
@@ -457,10 +459,7 @@ function renderMarkerList() {
   const list = document.getElementById('marker-list');
   document.getElementById('marker-count').textContent = markers.length;
   list.innerHTML = '';
-  if (!markers.length) {
-    list.innerHTML = '<span style="font-size:10px;color:#555;">пока нет маркеров</span>';
-    return;
-  }
+  if (!markers.length) { list.innerHTML = '<span style="font-size:10px;color:#555;">пока нет маркеров</span>'; return; }
   markers.forEach(m => {
     const item = document.createElement('div');
     item.className = 'marker-item';
@@ -472,19 +471,16 @@ function renderMarkerList() {
 function updateRouteMarkerBtns() {
   const wrap = document.getElementById('route-marker-btns');
   wrap.innerHTML = '';
-  if (!markers.length) {
-    wrap.innerHTML = '<span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>';
-    return;
-  }
+  if (!markers.length) { wrap.innerHTML = '<span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>'; return; }
   markers.forEach(m => {
     const btn = document.createElement('button');
     btn.className = 'btn btn-ghost';
     btn.style.cssText = 'display:flex;align-items:center;gap:6px;text-align:left;font-size:10px;';
-    btn.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label} <span style="color:#555;margin-left:auto;">${m.coords[0].toFixed(3)},${m.coords[1].toFixed(3)}</span>`;
+    btn.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label}<span style="color:#555;margin-left:auto;">${m.coords[0].toFixed(3)},${m.coords[1].toFixed(3)}</span>`;
     btn.onclick = () => {
+      const val = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
       const fromEl = document.getElementById('route-from');
       const toEl = document.getElementById('route-to');
-      const val = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
       if (!fromEl.value) { fromEl.value = val; log('откуда → ' + m.label, 'info'); }
       else { toEl.value = val; log('куда → ' + m.label, 'info'); }
     };
@@ -528,10 +524,9 @@ async function buildRoute() {
     if (props.duration) info += '  ·  ' + Math.round(props.duration / 60) + ' мин';
     if (props.distance) info += '  ·  ' + (props.distance / 1000).toFixed(1) + ' км';
     const infoEl = document.getElementById('route-info');
-    infoEl.textContent = info;
-    infoEl.className = 'route-info visible';
+    infoEl.textContent = info; infoEl.className = 'route-info visible';
     log('готово', 'ok');
-  } catch(e) { log('ошибка маршрута: ' + e.message, 'err'); }
+  } catch(e) { log('ошибка: ' + e.message, 'err'); }
 }
 
 function clearRoute() {
@@ -541,20 +536,13 @@ function clearRoute() {
 
 // ---- ТАБЫ ----
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['style','markers','route'][i] === name);
-  });
-  document.querySelectorAll('.panel').forEach(p => {
-    p.classList.toggle('active', p.id === 'panel-' + name);
-  });
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['style','markers','route'][i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
 }
 
 // ---- СТАРТ ----
 window.addEventListener('load', function() {
-  if (typeof ymaps3 === 'undefined') {
-    log('ymaps3 не загрузился — проверь ключ и домен в кабинете Яндекса', 'err');
-    return;
-  }
+  if (typeof ymaps3 === 'undefined') { log('ymaps3 не загрузился — проверь ключ и HTTP Referer в кабинете Яндекса', 'err'); return; }
   ymaps3.ready.then(initMap).catch(e => log('ready error: ' + e.message, 'err'));
 });
 </script>
