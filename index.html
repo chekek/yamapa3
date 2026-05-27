@@ -3,106 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Яндекс Карты v3 — стенд</title>
+<title>Яндекс Карты v3 — стенд кастомизации</title>
 <script src="https://api-maps.yandex.ru/v3/?apikey=e2cf8129-ff43-4729-b542-1591d12b5fef&lang=ru_RU" defer></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: monospace; background: #f5f5f3; display: flex; height: 100vh; overflow: hidden; }
+body { font-family: monospace; background: #1a1a1a; color: #eee; display: flex; height: 100vh; overflow: hidden; }
 
 .sidebar {
-  width: 280px; flex-shrink: 0;
-  background: #f0efe9;
-  border-right: 1px solid #ddd;
+  width: 260px; flex-shrink: 0;
+  background: #222;
+  border-right: 1px solid #333;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
 .sidebar-head {
-  padding: 12px 14px;
-  border-bottom: 1px solid #ddd;
+  padding: 10px 12px;
+  border-bottom: 1px solid #333;
   display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
 }
-.sidebar-head h1 { font-size: 13px; font-weight: 600; }
-.badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #d4e8fa; color: #185FA5; font-weight: 600; }
+.sidebar-head h1 { font-size: 12px; font-weight: 600; color: #fff; }
+.badge { font-size: 9px; padding: 2px 6px; border-radius: 8px; background: #1a3a5c; color: #5aabff; font-weight: 700; }
 
-.tabs { display: flex; border-bottom: 1px solid #ddd; }
+.tabs { display: flex; border-bottom: 1px solid #333; flex-shrink: 0; }
 .tab {
-  flex: 1; padding: 8px 4px; font-size: 11px; font-weight: 600;
-  color: #888; background: none; border: none; cursor: pointer;
-  font-family: monospace;
+  flex: 1; padding: 7px 2px; font-size: 10px; font-weight: 600;
+  color: #666; background: none; border: none; cursor: pointer;
+  font-family: monospace; transition: color 0.15s;
 }
-.tab.active { color: #111; background: #fff; border-bottom: 2px solid #111; }
-.tab:hover:not(.active) { background: #e8e8e4; }
+.tab.active { color: #fff; border-bottom: 2px solid #5aabff; }
+.tab:hover:not(.active) { color: #aaa; }
 
-.panel { flex: 1; overflow-y: auto; padding: 10px; display: none; flex-direction: column; gap: 7px; }
+.panel { flex: 1; overflow-y: auto; padding: 8px; display: none; flex-direction: column; gap: 0; }
 .panel.active { display: flex; }
+.panel::-webkit-scrollbar { width: 4px; }
+.panel::-webkit-scrollbar-track { background: #222; }
+.panel::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
 
-.section-label {
-  font-size: 10px; color: #999; text-transform: uppercase;
-  letter-spacing: 0.07em; margin-top: 4px;
+.group { margin-bottom: 2px; }
+.group-header {
+  font-size: 9px; color: #555; text-transform: uppercase;
+  letter-spacing: 0.08em; padding: 8px 4px 4px;
 }
+
 .toggle-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 0; border-bottom: 1px solid #e8e8e4;
+  padding: 4px 6px; border-radius: 4px; transition: background 0.1s;
 }
-.toggle-label { font-size: 12px; color: #222; }
-.toggle-sub { font-size: 10px; color: #aaa; }
+.toggle-row:hover { background: #2a2a2a; }
+.toggle-info { flex: 1; min-width: 0; }
+.toggle-label { font-size: 11px; color: #ccc; }
+.toggle-sub { font-size: 9px; color: #555; font-family: monospace; }
 
-.toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+.toggle { position: relative; width: 28px; height: 16px; flex-shrink: 0; margin-left: 8px; }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
-  position: absolute; inset: 0; background: #ccc;
-  border-radius: 9px; cursor: pointer; transition: background 0.2s;
+  position: absolute; inset: 0; background: #444;
+  border-radius: 8px; cursor: pointer; transition: background 0.2s;
 }
 .toggle-slider:before {
   content: ''; position: absolute;
-  height: 12px; width: 12px; left: 3px; top: 3px;
-  background: white; border-radius: 50%; transition: transform 0.2s;
+  height: 10px; width: 10px; left: 3px; top: 3px;
+  background: #888; border-radius: 50%; transition: transform 0.2s, background 0.2s;
 }
-input:checked + .toggle-slider { background: #378ADD; }
-input:checked + .toggle-slider:before { transform: translateX(14px); }
+input:checked + .toggle-slider { background: #1a3a5c; }
+input:checked + .toggle-slider:before { transform: translateX(12px); background: #5aabff; }
 
-.field-row { display: flex; flex-direction: column; gap: 3px; }
-.field-label { font-size: 11px; color: #666; }
-.field-input {
-  font-size: 12px; font-family: monospace;
-  background: #fff; border: 1px solid #ccc; border-radius: 6px;
-  padding: 5px 8px; color: #111; width: 100%;
-}
-.field-input:focus { outline: none; border-color: #888; }
+.divider { height: 1px; background: #2a2a2a; margin: 4px 0; }
 
+.btn-row { display: flex; gap: 5px; padding: 6px 4px; }
 .btn {
-  padding: 7px 10px; font-size: 11px; font-weight: 600;
-  font-family: monospace; border-radius: 6px; cursor: pointer;
-  width: 100%; transition: opacity 0.15s;
+  padding: 6px 8px; font-size: 10px; font-weight: 600;
+  font-family: monospace; border-radius: 5px; cursor: pointer;
+  flex: 1; transition: opacity 0.15s; border: none;
 }
-.btn-primary { background: #111; color: #fff; border: none; }
-.btn-primary:hover { opacity: 0.8; }
-.btn-secondary { background: none; border: 1px solid #ccc; color: #111; }
-.btn-secondary:hover { background: #eee; }
-.btn-danger { background: none; border: 1px solid #f5c6c6; color: #c0392b; }
-.btn-danger:hover { background: #fef0f0; }
-.btn-active { background: #378ADD; color: #fff; border: none; }
+.btn-primary { background: #5aabff; color: #000; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-ghost { background: #2a2a2a; color: #aaa; border: 1px solid #333; }
+.btn-ghost:hover { background: #333; color: #fff; }
+.btn-danger { background: #2a1a1a; color: #ff6b6b; border: 1px solid #3a2222; }
+.btn-danger:hover { background: #3a2222; }
+.btn-on { background: #1a3a2a; color: #5affaa; border: 1px solid #2a4a3a; }
 
-.hint {
-  font-size: 11px; color: #888; padding: 6px 8px;
-  background: #fff; border-radius: 6px; border: 1px solid #e8e8e4;
-  line-height: 1.5;
+.hint-box {
+  font-size: 10px; color: #666; padding: 6px 8px;
+  background: #1a1a1a; border-radius: 5px; border: 1px solid #2a2a2a;
+  line-height: 1.5; margin: 4px;
 }
 
-.marker-list { display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow-y: auto; }
+.field-row { display: flex; flex-direction: column; gap: 2px; padding: 4px; }
+.field-label { font-size: 10px; color: #666; }
+.field-input {
+  font-size: 11px; font-family: monospace;
+  background: #1a1a1a; border: 1px solid #333; border-radius: 5px;
+  padding: 5px 8px; color: #eee; width: 100%;
+}
+.field-input:focus { outline: none; border-color: #5aabff; }
+select.field-input { cursor: pointer; }
+
+.marker-list { display: flex; flex-direction: column; gap: 3px; padding: 4px; max-height: 140px; overflow-y: auto; }
 .marker-item {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 8px; background: #fff; border-radius: 6px;
-  border: 1px solid #e8e8e4; font-size: 11px;
+  display: flex; align-items: center;
+  padding: 4px 7px; background: #1a1a1a; border-radius: 5px;
+  border: 1px solid #2a2a2a; font-size: 10px; gap: 6px;
 }
-.marker-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; }
-.marker-coords { color: #666; flex: 1; }
-.marker-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px; padding: 0 2px; }
-.marker-del:hover { color: #c0392b; }
+.marker-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.marker-coords { color: #888; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marker-name { color: #ccc; }
+.marker-del { background: none; border: none; color: #444; cursor: pointer; font-size: 13px; padding: 0; margin-left: auto; }
+.marker-del:hover { color: #ff6b6b; }
 
 .route-info {
-  font-size: 11px; color: #333; padding: 7px 8px;
-  background: #fff; border-radius: 6px; border: 1px solid #e8e8e4;
+  font-size: 11px; color: #5affaa; padding: 6px 8px; margin: 4px;
+  background: #1a2a1a; border-radius: 5px; border: 1px solid #2a4a2a;
   display: none;
 }
 .route-info.visible { display: block; }
@@ -110,25 +123,27 @@ input:checked + .toggle-slider:before { transform: translateX(14px); }
 .map-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 #map { flex: 1; }
 
-.map-hint {
-  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; font-family: monospace;
-  padding: 5px 12px; border-radius: 20px; pointer-events: none;
-  opacity: 0; transition: opacity 0.2s;
+.map-click-hint {
+  position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.75); color: #fff; font-size: 11px; font-family: monospace;
+  padding: 5px 14px; border-radius: 20px; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s; white-space: nowrap;
 }
-.map-hint.visible { opacity: 1; }
+.map-click-hint.visible { opacity: 1; }
 
 .log {
-  background: #f0efe9; border-top: 1px solid #ddd;
-  padding: 6px 10px; font-size: 11px; font-family: monospace;
-  color: #666; max-height: 80px; overflow-y: auto;
-  display: flex; flex-direction: column; gap: 2px;
+  background: #1a1a1a; border-top: 1px solid #333;
+  padding: 5px 10px; font-size: 10px; font-family: monospace;
+  max-height: 72px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 1px; flex-shrink: 0;
 }
-.log-line { color: #222; }
-.log-line.info { color: #185FA5; }
-.log-line.err { color: #c0392b; }
-.log-line.muted { color: #aaa; }
-.log-line.ok { color: #27ae60; }
+.log::-webkit-scrollbar { width: 3px; }
+.log::-webkit-scrollbar-thumb { background: #333; }
+.ll { color: #555; }
+.ll.ok { color: #5affaa; }
+.ll.info { color: #5aabff; }
+.ll.err { color: #ff6b6b; }
+.ll.warn { color: #ffcc44; }
 </style>
 </head>
 <body>
@@ -139,150 +154,172 @@ input:checked + .toggle-slider:before { transform: translateX(14px); }
     <span class="badge">v3.x</span>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('markers')">Маркеры</button>
+    <button class="tab active" onclick="switchTab('style')">Слои</button>
+    <button class="tab" onclick="switchTab('markers')">Маркеры</button>
     <button class="tab" onclick="switchTab('route')">Маршрут</button>
-    <button class="tab" onclick="switchTab('style')">Стили</button>
+  </div>
+
+  <!-- СЛОИ -->
+  <div class="panel active" id="panel-style">
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="setTheme('light')">☀ light</button>
+      <button class="btn btn-ghost" onclick="setTheme('dark')">☾ dark</button>
+      <button class="btn btn-ghost" onclick="allOn()">все вкл</button>
+      <button class="btn btn-ghost" onclick="allOff()">все выкл</button>
+    </div>
+
+    <div class="group">
+      <div class="group-header">📌 POI — точки интереса</div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все POI</div><div class="toggle-sub">poi</div></div><label class="toggle"><input type="checkbox" data-tag="poi" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Еда и кафе</div><div class="toggle-sub">food / poi-food</div></div><label class="toggle"><input type="checkbox" data-tag="food" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Здоровье</div><div class="toggle-sub">health / poi-health</div></div><label class="toggle"><input type="checkbox" data-tag="health" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Образование</div><div class="toggle-sub">education / poi-education</div></div><label class="toggle"><input type="checkbox" data-tag="education" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Спорт</div><div class="toggle-sub">sport / poi-sport</div></div><label class="toggle"><input type="checkbox" data-tag="sport" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Развлечения</div><div class="toggle-sub">poi-entertainment</div></div><label class="toggle"><input type="checkbox" data-tag="poi-entertainment" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Парки (иконки)</div><div class="toggle-sub">poi-park</div></div><label class="toggle"><input type="checkbox" data-tag="poi-park" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Культура</div><div class="toggle-sub">poi-culture</div></div><label class="toggle"><input type="checkbox" data-tag="poi-culture" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Финансы</div><div class="toggle-sub">poi-finance</div></div><label class="toggle"><input type="checkbox" data-tag="poi-finance" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Магазины</div><div class="toggle-sub">poi-shopping</div></div><label class="toggle"><input type="checkbox" data-tag="poi-shopping" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Транспортные хабы</div><div class="toggle-sub">poi-transport</div></div><label class="toggle"><input type="checkbox" data-tag="poi-transport" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Религия</div><div class="toggle-sub">poi-religion</div></div><label class="toggle"><input type="checkbox" data-tag="poi-religion" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Гостиницы</div><div class="toggle-sub">poi-hotel</div></div><label class="toggle"><input type="checkbox" data-tag="poi-hotel" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Транспорт (остановки)</div><div class="toggle-sub">transit_location</div></div><label class="toggle"><input type="checkbox" data-tag="transit_location" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-header">🏙 Инфраструктура</div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все дороги</div><div class="toggle-sub">road</div></div><label class="toggle"><input type="checkbox" data-tag="road" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Второстепенные дороги</div><div class="toggle-sub">road-minor</div></div><label class="toggle"><input type="checkbox" data-tag="road-minor" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Магистрали</div><div class="toggle-sub">road-major</div></div><label class="toggle"><input type="checkbox" data-tag="road-major" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Здания</div><div class="toggle-sub">building</div></div><label class="toggle"><input type="checkbox" data-tag="building" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Транспорт (метро, ж/д)</div><div class="toggle-sub">transit</div></div><label class="toggle"><input type="checkbox" data-tag="transit" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Железная дорога</div><div class="toggle-sub">railway</div></div><label class="toggle"><input type="checkbox" data-tag="railway" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-header">💧 Природа и ландшафт</div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Вода</div><div class="toggle-sub">water</div></div><label class="toggle"><input type="checkbox" data-tag="water" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Зелень</div><div class="toggle-sub">vegetation</div></div><label class="toggle"><input type="checkbox" data-tag="vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Ландшафт</div><div class="toggle-sub">landscape</div></div><label class="toggle"><input type="checkbox" data-tag="landscape" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Подложка земли</div><div class="toggle-sub">land</div></div><label class="toggle"><input type="checkbox" data-tag="land" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-header">🌍 Административное деление</div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Страны</div><div class="toggle-sub">country</div></div><label class="toggle"><input type="checkbox" data-tag="country" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Регионы / области</div><div class="toggle-sub">state</div></div><label class="toggle"><input type="checkbox" data-tag="state" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Районы города</div><div class="toggle-sub">district</div></div><label class="toggle"><input type="checkbox" data-tag="district" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Населённые пункты</div><div class="toggle-sub">locality</div></div><label class="toggle"><input type="checkbox" data-tag="locality" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Все адм. объекты</div><div class="toggle-sub">admin</div></div><label class="toggle"><input type="checkbox" data-tag="admin" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="exportStyles()">копировать JSON</button>
+    </div>
   </div>
 
   <!-- МАРКЕРЫ -->
-  <div class="panel active" id="panel-markers">
-    <div class="hint">Кликай на карту чтобы поставить маркер. Или введи координаты вручную.</div>
+  <div class="panel" id="panel-markers">
+    <div class="hint-box">Включи режим клика и кликай на карту. Или введи координаты вручную.</div>
 
-    <div style="display:flex; gap:6px; align-items:center;">
-      <button class="btn btn-secondary" id="click-mode-btn" style="flex:1" onclick="toggleClickMode()">режим клика: выкл</button>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="click-btn" onclick="toggleClickMode()">режим клика: выкл</button>
     </div>
 
     <div class="field-row">
-      <span class="field-label">Цвет маркера</span>
-      <input type="color" id="marker-color" value="#e34a30" style="width:100%; height:32px; border:1px solid #ccc; border-radius:6px; cursor:pointer; padding:2px;">
+      <span class="field-label">Цвет</span>
+      <input type="color" id="marker-color" value="#5aabff" style="width:100%;height:30px;border:1px solid #333;border-radius:5px;cursor:pointer;padding:2px;background:#1a1a1a;">
     </div>
-
     <div class="field-row">
-      <span class="field-label">Подпись</span>
-      <input class="field-input" id="marker-label" placeholder="необязательно" />
+      <span class="field-label">Подпись (необязательно)</span>
+      <input class="field-input" id="marker-label" placeholder="метка">
     </div>
-
     <div class="field-row">
-      <span class="field-label">Координаты (lon, lat) — вручную</span>
-      <input class="field-input" id="manual-coords" placeholder="37.6176, 55.7558" />
+      <span class="field-label">Координаты lon, lat</span>
+      <input class="field-input" id="manual-coords" placeholder="37.6176, 55.7558">
     </div>
-    <button class="btn btn-primary" onclick="addMarkerManual()">добавить маркер</button>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addMarkerManual()">добавить</button>
+      <button class="btn btn-danger" onclick="clearAllMarkers()">удалить все</button>
+    </div>
 
-    <span class="section-label">на карте (<span id="marker-count">0</span>)</span>
-    <div class="marker-list" id="marker-list"></div>
-    <button class="btn btn-danger" onclick="clearAllMarkers()">удалить все маркеры</button>
+    <div class="group-header">на карте (<span id="marker-count">0</span>)</div>
+    <div class="marker-list" id="marker-list">
+      <span style="font-size:10px;color:#555;">пока нет маркеров</span>
+    </div>
   </div>
 
   <!-- МАРШРУТ -->
   <div class="panel" id="panel-route">
-    <div class="hint">Выбери точки из добавленных маркеров или введи координаты. Маршрут — пешеходный.</div>
+    <div class="hint-box">Добавь маркеры и нажми на них чтобы выбрать точки маршрута.</div>
 
     <div class="field-row">
       <span class="field-label">Откуда (lon, lat)</span>
-      <input class="field-input" id="route-from" placeholder="37.6176, 55.7558" />
+      <input class="field-input" id="route-from" placeholder="37.6176, 55.7558">
     </div>
     <div class="field-row">
       <span class="field-label">Куда (lon, lat)</span>
-      <input class="field-input" id="route-to" placeholder="37.6300, 55.7600" />
+      <input class="field-input" id="route-to" placeholder="37.6300, 55.7650">
     </div>
-
     <div class="field-row">
-      <span class="field-label">Тип маршрута</span>
+      <span class="field-label">Тип</span>
       <select class="field-input" id="route-type">
-        <option value="pedestrian">пешеходный</option>
-        <option value="driving">авто</option>
-        <option value="bicycle">велосипед</option>
+        <option value="pedestrian">🚶 пешеходный</option>
+        <option value="driving">🚗 автомобильный</option>
+        <option value="bicycle">🚲 велосипедный</option>
       </select>
     </div>
-
-    <button class="btn btn-primary" onclick="buildRoute()">построить маршрут</button>
-    <button class="btn btn-secondary" onclick="clearRoute()">очистить маршрут</button>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="buildRoute()">построить</button>
+      <button class="btn btn-ghost" onclick="clearRoute()">очистить</button>
+    </div>
 
     <div class="route-info" id="route-info"></div>
 
-    <span class="section-label">использовать маркеры</span>
-    <div class="hint" id="route-markers-hint">Добавь маркеры на вкладке «Маркеры» — они появятся здесь.</div>
-    <div id="route-marker-btns" style="display:flex; flex-direction:column; gap:4px;"></div>
-  </div>
-
-  <!-- СТИЛИ -->
-  <div class="panel" id="panel-style">
-    <span class="section-label">POI — точки интереса</span>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Показывать POI</div><div class="toggle-sub">poi</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-poi" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
+    <div class="group-header" style="padding-top:8px;">из маркеров</div>
+    <div id="route-marker-btns" style="display:flex;flex-direction:column;gap:3px;padding:4px;">
+      <span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>
     </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Транспорт</div><div class="toggle-sub">transit_location</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-transit" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Иконки POI</div><div class="toggle-sub">geometry</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-poi-icons" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Подписи POI</div><div class="toggle-sub">label</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-poi-labels" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <span class="section-label">Объекты карты</span>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Дороги</div><div class="toggle-sub">road</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-road" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Здания</div><div class="toggle-sub">structure</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-structure" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Вода</div><div class="toggle-sub">water</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-water" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div><div class="toggle-label">Зелень</div><div class="toggle-sub">vegetation</div></div>
-      <label class="toggle"><input type="checkbox" id="tog-vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label>
-    </div>
-    <span class="section-label">Тема</span>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-secondary" style="flex:1" onclick="setTheme('light')">light</button>
-      <button class="btn btn-secondary" style="flex:1" onclick="setTheme('dark')">dark</button>
-    </div>
-    <button class="btn btn-secondary" onclick="exportStyles()">скопировать JSON</button>
   </div>
 </div>
 
 <div class="map-col">
   <div id="map"></div>
-  <div class="map-hint" id="map-hint">кликни на карту чтобы поставить маркер</div>
+  <div class="map-click-hint" id="map-click-hint">кликни на карту → поставить маркер</div>
   <div class="log" id="log">
-    <span class="log-line muted">// загрузка API...</span>
+    <span class="ll">// загрузка API...</span>
   </div>
 </div>
 
 <script>
 let map = null, schemeLayer = null, featuresLayer = null;
-let currentTheme = 'light';
+let currentTheme = 'dark';
 let clickMode = false;
-let markers = []; // {id, coords, color, label, mapObj, el}
+let markers = [];
 let routeFeature = null;
 let markerIdCounter = 0;
-let YMapMarkerClass = null;
-let YMapFeatureClass = null;
+let YMapMarkerClass = null, YMapFeatureClass = null;
 
-// --- LOG ---
 function log(msg, type) {
   const el = document.getElementById('log');
   const line = document.createElement('span');
-  line.className = 'log-line' + (type ? ' ' + type : '');
+  line.className = 'll' + (type ? ' ' + type : '');
   const ts = new Date().toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   line.textContent = '[' + ts + '] ' + msg;
   el.appendChild(line);
   el.scrollTop = el.scrollHeight;
 }
 
-// --- INIT ---
 async function initMap() {
   try {
-    await ymaps3.ready;
+    ymaps3.getDefaultConfig().setApikeys({ router: '3f9d0777-6732-4d3a-8f22-68c03b7183e7' });
     const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapFeature, YMapListener } = ymaps3;
     YMapMarkerClass = YMapMarker;
     YMapFeatureClass = YMapFeature;
@@ -291,66 +328,79 @@ async function initMap() {
       location: { center: [37.6176, 55.7558], zoom: 12 }
     });
 
-    schemeLayer = new YMapDefaultSchemeLayer({ theme: 'light', customization: [] });
+    schemeLayer = new YMapDefaultSchemeLayer({ theme: currentTheme, customization: [] });
     featuresLayer = new YMapDefaultFeaturesLayer();
     map.addChild(schemeLayer);
     map.addChild(featuresLayer);
 
-    // клик на карту
     const listener = new YMapListener({
       layer: 'any',
       onClick: (obj, event) => {
         if (!clickMode) return;
-        const coords = event.coordinates;
-        if (coords) addMarkerAtCoords(coords);
+        if (event && event.coordinates) addMarkerAtCoords(event.coordinates);
       }
     });
     map.addChild(listener);
 
     log('Map v3 готова', 'ok');
   } catch(e) {
-    log('Ошибка: ' + e.message, 'err');
+    log('Ошибка init: ' + e.message, 'err');
   }
 }
 
-// --- CLICK MODE ---
-function toggleClickMode() {
-  clickMode = !clickMode;
-  const btn = document.getElementById('click-mode-btn');
-  const hint = document.getElementById('map-hint');
-  if (clickMode) {
-    btn.textContent = 'режим клика: вкл';
-    btn.className = 'btn btn-active';
-    hint.classList.add('visible');
-  } else {
-    btn.textContent = 'режим клика: выкл';
-    btn.className = 'btn btn-secondary';
-    hint.classList.remove('visible');
-  }
+// ---- СТИЛИ ----
+function buildCustomization() {
+  const styles = [];
+  document.querySelectorAll('[data-tag]').forEach(input => {
+    if (!input.checked) {
+      const tag = input.dataset.tag;
+      styles.push({ tags: { all: [tag] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+      styles.push({ tags: { all: [tag] }, elements: 'label', stylers: [{ opacity: 0 }] });
+    }
+  });
+  return styles;
 }
 
-// --- MARKERS ---
+function applyStyles() {
+  if (!schemeLayer) return;
+  const styles = buildCustomization();
+  schemeLayer.update({ customization: styles, theme: currentTheme });
+  log('стили: ' + styles.length / 2 + ' скрытых слоёв', 'info');
+}
+
+function setTheme(t) {
+  currentTheme = t;
+  applyStyles();
+  log('тема → ' + t, 'info');
+}
+
+function allOn() {
+  document.querySelectorAll('[data-tag]').forEach(i => i.checked = true);
+  applyStyles();
+}
+
+function allOff() {
+  document.querySelectorAll('[data-tag]').forEach(i => i.checked = false);
+  applyStyles();
+}
+
+function exportStyles() {
+  const json = JSON.stringify(buildCustomization(), null, 2);
+  navigator.clipboard.writeText(json)
+    .then(() => log('JSON скопирован в буфер', 'ok'))
+    .catch(() => { console.log(json); log('JSON в консоли (F12)', 'info'); });
+}
+
+// ---- МАРКЕРЫ ----
 function makeMarkerEl(color, label) {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; cursor:pointer;';
-
+  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;cursor:pointer;transform:translate(-50%,-100%)';
   const pin = document.createElement('div');
-  pin.style.cssText = `
-    width: 28px; height: 28px; border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    background: ${color};
-    border: 3px solid white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  `;
+  pin.style.cssText = `width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 8px rgba(0,0,0,0.5)`;
   wrap.appendChild(pin);
-
   if (label) {
     const lbl = document.createElement('div');
-    lbl.style.cssText = `
-      margin-top: 4px; font-size: 10px; font-family: monospace;
-      background: rgba(0,0,0,0.65); color: #fff;
-      padding: 2px 6px; border-radius: 10px; white-space: nowrap;
-    `;
+    lbl.style.cssText = 'margin-top:5px;font-size:10px;font-family:monospace;background:rgba(0,0,0,0.75);color:#fff;padding:2px 6px;border-radius:8px;white-space:nowrap;';
     lbl.textContent = label;
     wrap.appendChild(lbl);
   }
@@ -367,28 +417,23 @@ function addMarkerManual() {
   const raw = document.getElementById('manual-coords').value.trim();
   if (!raw) return;
   const parts = raw.split(',').map(s => parseFloat(s.trim()));
-  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) {
-    log('Неверный формат координат', 'err'); return;
-  }
+  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) { log('неверные координаты', 'err'); return; }
   const color = document.getElementById('marker-color').value;
   const label = document.getElementById('marker-label').value.trim();
   _addMarker(parts, color, label);
 }
 
 function _addMarker(coords, color, label) {
-  if (!map || !YMapMarkerClass) return;
+  if (!map || !YMapMarkerClass) { log('карта ещё не готова', 'warn'); return; }
   const id = ++markerIdCounter;
-  const el = makeMarkerEl(color, label || ('#' + id));
-  const markerObj = new YMapMarkerClass({
-    coordinates: coords,
-    draggable: false
-  }, el);
-  map.addChild(markerObj);
-  const m = { id, coords, color, label: label || ('#' + id), mapObj: markerObj, el };
-  markers.push(m);
+  const displayLabel = label || ('#' + id);
+  const el = makeMarkerEl(color, displayLabel);
+  const obj = new YMapMarkerClass({ coordinates: coords }, el);
+  map.addChild(obj);
+  markers.push({ id, coords, color, label: displayLabel, mapObj: obj });
   renderMarkerList();
   updateRouteMarkerBtns();
-  log('маркер #' + id + ' → [' + coords.map(v=>v.toFixed(4)) + ']', 'info');
+  log('маркер ' + displayLabel + ' → [' + coords[0].toFixed(4) + ', ' + coords[1].toFixed(4) + ']', 'info');
 }
 
 function removeMarker(id) {
@@ -405,177 +450,112 @@ function clearAllMarkers() {
   markers = [];
   renderMarkerList();
   updateRouteMarkerBtns();
-  log('все маркеры удалены');
+  log('маркеры удалены');
 }
 
 function renderMarkerList() {
   const list = document.getElementById('marker-list');
   document.getElementById('marker-count').textContent = markers.length;
   list.innerHTML = '';
-  if (markers.length === 0) {
-    list.innerHTML = '<span style="font-size:11px;color:#aaa;">пока нет маркеров</span>';
+  if (!markers.length) {
+    list.innerHTML = '<span style="font-size:10px;color:#555;">пока нет маркеров</span>';
     return;
   }
   markers.forEach(m => {
     const item = document.createElement('div');
     item.className = 'marker-item';
-    item.innerHTML = `
-      <div class="marker-dot" style="background:${m.color}"></div>
-      <span class="marker-coords">${m.label} [${m.coords[0].toFixed(3)}, ${m.coords[1].toFixed(3)}]</span>
-      <button class="marker-del" onclick="removeMarker(${m.id})">✕</button>
-    `;
+    item.innerHTML = `<div class="marker-dot" style="background:${m.color}"></div><span class="marker-name">${m.label}</span><span class="marker-coords">${m.coords[0].toFixed(3)},${m.coords[1].toFixed(3)}</span><button class="marker-del" onclick="removeMarker(${m.id})">✕</button>`;
     list.appendChild(item);
   });
 }
 
 function updateRouteMarkerBtns() {
   const wrap = document.getElementById('route-marker-btns');
-  const hint = document.getElementById('route-markers-hint');
   wrap.innerHTML = '';
-  if (markers.length === 0) {
-    hint.style.display = 'block';
+  if (!markers.length) {
+    wrap.innerHTML = '<span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>';
     return;
   }
-  hint.style.display = 'none';
   markers.forEach(m => {
     const btn = document.createElement('button');
-    btn.className = 'btn btn-secondary';
-    btn.style.cssText = 'display:flex; align-items:center; gap:6px; text-align:left;';
-    btn.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label}`;
+    btn.className = 'btn btn-ghost';
+    btn.style.cssText = 'display:flex;align-items:center;gap:6px;text-align:left;font-size:10px;';
+    btn.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label} <span style="color:#555;margin-left:auto;">${m.coords[0].toFixed(3)},${m.coords[1].toFixed(3)}</span>`;
     btn.onclick = () => {
       const fromEl = document.getElementById('route-from');
       const toEl = document.getElementById('route-to');
-      if (!fromEl.value) {
-        fromEl.value = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
-        log('Откуда → ' + m.label, 'info');
-      } else {
-        toEl.value = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
-        log('Куда → ' + m.label, 'info');
-      }
+      const val = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
+      if (!fromEl.value) { fromEl.value = val; log('откуда → ' + m.label, 'info'); }
+      else { toEl.value = val; log('куда → ' + m.label, 'info'); }
     };
     wrap.appendChild(btn);
   });
 }
 
-// --- ROUTE ---
+function toggleClickMode() {
+  clickMode = !clickMode;
+  const btn = document.getElementById('click-btn');
+  const hint = document.getElementById('map-click-hint');
+  btn.textContent = 'режим клика: ' + (clickMode ? 'вкл' : 'выкл');
+  btn.className = clickMode ? 'btn btn-on' : 'btn btn-ghost';
+  hint.classList.toggle('visible', clickMode);
+}
+
+// ---- МАРШРУТ ----
 async function buildRoute() {
   if (!map) return;
   const fromRaw = document.getElementById('route-from').value.trim();
   const toRaw = document.getElementById('route-to').value.trim();
-  const type = document.getElementById('route-type').value;
-
-  if (!fromRaw || !toRaw) { log('Укажи обе точки маршрута', 'err'); return; }
-
+  if (!fromRaw || !toRaw) { log('укажи обе точки', 'warn'); return; }
   const from = fromRaw.split(',').map(s => parseFloat(s.trim()));
   const to = toRaw.split(',').map(s => parseFloat(s.trim()));
-
-  if (from.length < 2 || to.length < 2) { log('Неверный формат координат', 'err'); return; }
-
+  if (isNaN(from[0]) || isNaN(to[0])) { log('неверные координаты', 'err'); return; }
+  const type = document.getElementById('route-type').value;
   clearRoute();
-  log('строю маршрут (' + type + ')...', 'muted');
-
+  log('строю маршрут (' + type + ')...', 'info');
   try {
-    const { route } = await ymaps3.route({
-      points: [from, to],
-      type: type,
-    });
-
-    if (!route) { log('Маршрут не найден', 'err'); return; }
-
+    const { route } = await ymaps3.route({ points: [from, to], type });
+    if (!route) { log('маршрут не найден', 'err'); return; }
     const geometry = route.toRoute().geometry;
-
+    const colors = { pedestrian: '#5aabff', driving: '#ff6b6b', bicycle: '#5affaa' };
     routeFeature = new YMapFeatureClass({
       geometry,
-      style: {
-        stroke: [{ color: type === 'pedestrian' ? '#378ADD' : type === 'driving' ? '#e34a30' : '#27ae60', width: 4 }],
-        simplificationRate: 0
-      }
+      style: { stroke: [{ color: colors[type] || '#fff', width: 4 }], simplificationRate: 0 }
     });
     map.addChild(routeFeature);
-
-    // инфо о маршруте
     const props = route.toRoute().properties || {};
-    const info = document.getElementById('route-info');
-    let infoText = '✓ маршрут построен';
-    if (props.duration) infoText += ' · ' + Math.round(props.duration / 60) + ' мин';
-    if (props.distance) infoText += ' · ' + (props.distance / 1000).toFixed(1) + ' км';
-    info.textContent = infoText;
-    info.className = 'route-info visible';
-
-    log('маршрут готов', 'ok');
-  } catch(e) {
-    log('Ошибка маршрута: ' + e.message, 'err');
-  }
+    let info = '✓ маршрут построен';
+    if (props.duration) info += '  ·  ' + Math.round(props.duration / 60) + ' мин';
+    if (props.distance) info += '  ·  ' + (props.distance / 1000).toFixed(1) + ' км';
+    const infoEl = document.getElementById('route-info');
+    infoEl.textContent = info;
+    infoEl.className = 'route-info visible';
+    log('готово', 'ok');
+  } catch(e) { log('ошибка маршрута: ' + e.message, 'err'); }
 }
 
 function clearRoute() {
-  if (routeFeature && map) {
-    try { map.removeChild(routeFeature); } catch(e){}
-    routeFeature = null;
-  }
+  if (routeFeature && map) { try { map.removeChild(routeFeature); } catch(e){} routeFeature = null; }
   document.getElementById('route-info').className = 'route-info';
 }
 
-// --- STYLES ---
-function buildCustomization() {
-  const styles = [];
-  const g = id => document.getElementById(id).checked;
-  if (!g('tog-poi')) {
-    styles.push({ tags: { all: ['poi'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    styles.push({ tags: { all: ['poi'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  } else {
-    if (!g('tog-poi-icons')) styles.push({ tags: { all: ['poi'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    if (!g('tog-poi-labels')) styles.push({ tags: { all: ['poi'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  }
-  if (!g('tog-transit')) {
-    styles.push({ tags: { all: ['transit_location'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    styles.push({ tags: { all: ['transit_location'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  }
-  if (!g('tog-road')) {
-    styles.push({ tags: { all: ['road'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-    styles.push({ tags: { all: ['road'] }, elements: 'label', stylers: [{ opacity: 0 }] });
-  }
-  if (!g('tog-structure')) styles.push({ tags: { all: ['structure'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-  if (!g('tog-water')) styles.push({ tags: { all: ['water'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-  if (!g('tog-vegetation')) styles.push({ tags: { all: ['vegetation'] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-  return styles;
-}
-
-function applyStyles() {
-  if (!schemeLayer) return;
-  const styles = buildCustomization();
-  schemeLayer.update({ customization: styles, theme: currentTheme });
-  log('стили обновлены (' + styles.length + ' правил)', 'info');
-}
-
-function setTheme(t) { currentTheme = t; applyStyles(); log('theme → ' + t, 'info'); }
-
-function exportStyles() {
-  const json = JSON.stringify(buildCustomization(), null, 2);
-  navigator.clipboard.writeText(json)
-    .then(() => log('скопировано в буфер', 'ok'))
-    .catch(() => { console.log(json); log('JSON в консоли (F12)', 'info'); });
-}
-
-// --- TABS ---
+// ---- ТАБЫ ----
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['markers','route','style'][i] === name);
+    t.classList.toggle('active', ['style','markers','route'][i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => {
     p.classList.toggle('active', p.id === 'panel-' + name);
   });
 }
 
-// --- START ---
+// ---- СТАРТ ----
 window.addEventListener('load', function() {
   if (typeof ymaps3 === 'undefined') {
-    document.getElementById('log').innerHTML = '<span class="log-line err">Яндекс API не загрузился. Проверь соединение и что открыто через localhost.</span>';
+    log('ymaps3 не загрузился — проверь ключ и домен в кабинете Яндекса', 'err');
     return;
   }
-  ymaps3.ready.then(function() { initMap(); }).catch(function(e) {
-    document.getElementById('log').innerHTML = '<span class="log-line err">Ошибка: ' + e.message + '</span>';
-  });
+  ymaps3.ready.then(initMap).catch(e => log('ready error: ' + e.message, 'err'));
 });
 </script>
 </body>
