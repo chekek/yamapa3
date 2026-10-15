@@ -134,6 +134,56 @@ select.field-input { cursor: pointer; }
 }
 .map-click-hint.visible { opacity: 1; }
 
+/* ---- 3D / камера ---- */
+.map-ctl {
+  position: absolute; top: 12px; right: 12px; z-index: 10;
+  display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+}
+.map-ctl-btn {
+  width: 40px; height: 40px; border-radius: 9px;
+  background: rgba(34,34,34,0.92); border: 1px solid #3a3a3a;
+  color: #aaa; font-family: monospace; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.map-ctl-btn:hover { background: #2e2e2e; color: #fff; }
+.map-ctl-btn.on { background: #1a3a5c; border-color: #2a4a6c; color: #5aabff; }
+
+.cam-panel {
+  width: 182px;
+  background: rgba(34,34,34,0.92);
+  border: 1px solid #3a3a3a; border-radius: 9px;
+  padding: 9px 10px 8px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.cam-title {
+  font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: .08em;
+}
+.cam-row { display: flex; align-items: center; gap: 7px; }
+.cam-label { font-size: 10px; color: #999; flex-shrink: 0; width: 52px; }
+.cam-value { font-size: 10px; color: #5aabff; flex-shrink: 0; width: 30px; text-align: right; }
+.cam-slider {
+  flex: 1; min-width: 0;
+  -webkit-appearance: none; appearance: none;
+  height: 3px; border-radius: 2px; background: #444;
+  outline: none; cursor: pointer;
+}
+.cam-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #5aabff; border: 1px solid #1a3a5c; cursor: pointer;
+}
+.cam-slider::-moz-range-thumb {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #5aabff; border: 1px solid #1a3a5c; cursor: pointer;
+}
+.cam-slider::-moz-range-track { height: 3px; border-radius: 2px; background: #444; }
+.cam-reset {
+  padding: 4px 6px; font-size: 9px; font-weight: 600; font-family: monospace;
+  background: #2a2a2a; color: #aaa; border: 1px solid #333; border-radius: 5px;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.cam-reset:hover { background: #333; color: #fff; }
+
 .log {
   background: #1a1a1a; border-top: 1px solid #333;
   padding: 5px 10px; font-size: 10px; font-family: monospace;
@@ -310,6 +360,28 @@ select.field-input { cursor: pointer; }
 
 <div class="map-col">
   <div id="map"></div>
+
+  <!-- 3D / камера -->
+  <div class="map-ctl">
+    <button class="map-ctl-btn" id="btn-3d" onclick="toggle3D()" title="3D-режим (наклон 60°)">3D</button>
+    <div class="cam-panel">
+      <div class="cam-title">камера</div>
+      <div class="cam-row">
+        <span class="cam-label">наклон</span>
+        <input type="range" class="cam-slider" id="tilt-slider" min="0" max="60" step="1" value="0"
+               oninput="onTiltSlide(this.value)" onchange="log('наклон → ' + this.value + '°', 'info')">
+        <span class="cam-value" id="tilt-value">0°</span>
+      </div>
+      <div class="cam-row">
+        <span class="cam-label">поворот</span>
+        <input type="range" class="cam-slider" id="bearing-slider" min="0" max="360" step="1" value="0"
+               oninput="onBearingSlide(this.value)" onchange="log('поворот → ' + this.value + '°', 'info')">
+        <span class="cam-value" id="bearing-value">0°</span>
+      </div>
+      <button class="cam-reset" onclick="resetView()">сброс камеры</button>
+    </div>
+  </div>
+
   <div class="map-click-hint" id="map-click-hint">кликни на карту → поставить маркер</div>
   <div class="log" id="log">
     <span class="ll">// загрузка API...</span>
@@ -388,7 +460,7 @@ function applyStyles() {
 
 function setTheme(t) { currentTheme = t; applyStyles(); log('тема → ' + t, 'info'); }
 function allOn()  { document.querySelectorAll('[data-tag]').forEach(i => i.checked = true);  applyStyles(); }
-function allOff() { document.querySelectorAll('[data-tag]').forEach(i => i.checked = false); applyStyles(); }
+function allOff() { document.querySelectorAll('[data-tag]').forEach(i => i.checked = false; applyStyles(); }
 
 function exportStyles() {
   const json = JSON.stringify(buildCustomization(), null, 2);
@@ -532,6 +604,82 @@ async function buildRoute() {
 function clearRoute() {
   if (routeFeature && map) { try { map.removeChild(routeFeature); } catch(e){} routeFeature = null; }
   document.getElementById('route-info').className = 'route-info';
+}
+
+// ---- 3D / КАМЕРА ----
+let camState = { tilt: 0, bearing: 0 };   // углы в градусах (в UI)
+let pre3DZoom = null;                     // зум, который был до первого наклона
+
+const DEG = Math.PI / 180;                // v3 принимает углы камеры в радианах
+const MIN_3D_ZOOM = 16.5;                 // с этого зума здания рисуются объёмными
+
+// обёртка: в свежих версиях v3 — setCamera, в ранних сборках то же делает setLocation
+function setCam(p) {
+  if (!map) return;
+  if (typeof map.setCamera === 'function') map.setCamera(p);
+  else if (typeof map.setLocation === 'function') map.setLocation(p);
+  else map.update({ location: p });
+}
+const cam = () => map.camera || {};
+
+function syncCamUI() {
+  document.getElementById('tilt-slider').value = Math.round(camState.tilt);
+  document.getElementById('tilt-value').textContent = Math.round(camState.tilt) + '°';
+  document.getElementById('bearing-slider').value = Math.round(camState.bearing);
+  document.getElementById('bearing-value').textContent = Math.round(camState.bearing) + '°';
+  document.getElementById('btn-3d').classList.toggle('on', camState.tilt > 0);
+}
+
+function onTiltSlide(val) {
+  if (!map) return;
+  const deg = parseInt(val, 10);
+  if (deg > 0 && camState.tilt === 0 && (cam().zoom || 12) < MIN_3D_ZOOM) {
+    // первый наклон при мелком зуме — дотягиваем зум, чтобы здания были видны в объёме
+    pre3DZoom = cam().zoom || 12;
+    setCam({ tilt: deg * DEG, zoom: MIN_3D_ZOOM });
+  } else if (deg === 0 && camState.tilt > 0 && pre3DZoom) {
+    // вернули наклон в 0 — возвращаем прежний зум
+    setCam({ tilt: 0, zoom: pre3DZoom });
+    pre3DZoom = null;
+  } else {
+    setCam({ tilt: deg * DEG });
+  }
+  camState.tilt = deg;
+  syncCamUI();
+}
+
+function onBearingSlide(val) {
+  if (!map) return;
+  camState.bearing = parseInt(val, 10);
+  setCam({ bearing: camState.bearing * DEG });
+  syncCamUI();
+}
+
+function toggle3D() {
+  if (!map) { log('карта ещё не готова', 'warn'); return; }
+  if (camState.tilt > 0) {
+    camState.tilt = 0;
+    if (pre3DZoom) { setCam({ tilt: 0, zoom: pre3DZoom, duration: 700 }); pre3DZoom = null; }
+    else setCam({ tilt: 0, duration: 700 });
+    log('3D выкл', 'info');
+  } else {
+    camState.tilt = 60;
+    const z = cam().zoom || 12;
+    if (z < MIN_3D_ZOOM) pre3DZoom = z;
+    const zoom = Math.max(z, MIN_3D_ZOOM);
+    setCam({ tilt: 60 * DEG, zoom, duration: 700 });
+    log('3D вкл · наклон 60° · зум ' + zoom.toFixed(1), 'info');
+  }
+  syncCamUI();
+}
+
+function resetView() {
+  if (!map) { log('карта ещё не готова', 'warn'); return; }
+  camState = { tilt: 0, bearing: 0 };
+  pre3DZoom = null;
+  setCam({ center: [37.6176, 55.7558], zoom: 12, tilt: 0, bearing: 0, duration: 700 });
+  syncCamUI();
+  log('камера сброшена');
 }
 
 // ---- ТАБЫ ----
