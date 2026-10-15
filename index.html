@@ -363,19 +363,17 @@ select.field-input { cursor: pointer; }
 
   <!-- 3D / камера -->
   <div class="map-ctl">
-    <button class="map-ctl-btn" id="btn-3d" onclick="toggle3D()" title="3D-режим (наклон 60°)">3D</button>
+    <button class="map-ctl-btn" id="btn-3d" onclick="toggle3D()" title="3D-режим">3D</button>
     <div class="cam-panel">
       <div class="cam-title">камера</div>
       <div class="cam-row">
         <span class="cam-label">наклон</span>
-        <input type="range" class="cam-slider" id="tilt-slider" min="0" max="60" step="1" value="0"
-               oninput="onTiltSlide(this.value)" onchange="log('наклон → ' + this.value + '°', 'info')">
+        <input type="range" class="cam-slider" id="tilt-slider" min="0" max="60" step="1" value="0" oninput="onTiltSlide(this.value)">
         <span class="cam-value" id="tilt-value">0°</span>
       </div>
       <div class="cam-row">
         <span class="cam-label">поворот</span>
-        <input type="range" class="cam-slider" id="bearing-slider" min="0" max="360" step="1" value="0"
-               oninput="onBearingSlide(this.value)" onchange="log('поворот → ' + this.value + '°', 'info')">
+        <input type="range" class="cam-slider" id="bearing-slider" min="0" max="360" step="1" value="0" oninput="onBearingSlide(this.value)">
         <span class="cam-value" id="bearing-value">0°</span>
       </div>
       <button class="cam-reset" onclick="resetView()">сброс камеры</button>
@@ -474,7 +472,7 @@ function makeMarkerEl(color, label) {
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;cursor:pointer;transform:translate(-50%,-100%)';
   const pin = document.createElement('div');
-  pin.style.cssText = `width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 8px rgba(0,0,0,0.5)`;
+  pin.style.cssText = 'width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + color + ';border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 8px rgba(0,0,0,0.5)';
   wrap.appendChild(pin);
   if (label) {
     const lbl = document.createElement('div');
@@ -506,7 +504,7 @@ function _addMarker(coords, color, label) {
   const el = makeMarkerEl(color, displayLabel);
   const obj = new YMapMarkerClass({ coordinates: coords }, el);
   map.addChild(obj);
-  markers.push({ id, coords, color, label: displayLabel, mapObj: obj });
+  markers.push({ id: id, coords: coords, color: color, label: displayLabel, mapObj: obj });
   renderMarkerList();
   updateRouteMarkerBtns();
   log('маркер ' + displayLabel + ' [' + coords[0].toFixed(4) + ', ' + coords[1].toFixed(4) + ']', 'info');
@@ -517,13 +515,15 @@ function removeMarker(id) {
   if (idx === -1) return;
   try { map.removeChild(markers[idx].mapObj); } catch(e){}
   markers.splice(idx, 1);
-  renderMarkerList(); updateRouteMarkerBtns();
+  renderMarkerList();
+  updateRouteMarkerBtns();
 }
 
 function clearAllMarkers() {
   markers.forEach(m => { try { map.removeChild(m.mapObj); } catch(e){} });
   markers = [];
-  renderMarkerList(); updateRouteMarkerBtns();
+  renderMarkerList();
+  updateRouteMarkerBtns();
   log('маркеры удалены');
 }
 
@@ -531,11 +531,14 @@ function renderMarkerList() {
   const list = document.getElementById('marker-list');
   document.getElementById('marker-count').textContent = markers.length;
   list.innerHTML = '';
-  if (!markers.length) { list.innerHTML = '<span style="font-size:10px;color:#555;">пока нет маркеров</span>'; return; }
+  if (!markers.length) {
+    list.innerHTML = '<span style="font-size:10px;color:#555;">пока нет маркеров</span>';
+    return;
+  }
   markers.forEach(m => {
     const item = document.createElement('div');
     item.className = 'marker-item';
-    item.innerHTML = `<div class="marker-dot" style="background:${m.color}"></div><span class="marker-name">${m.label}</span><span class="marker-coords">${m.coords[0].toFixed(3)},${m.coords[1].toFixed(3)}</span><button class="marker-del" onclick="removeMarker(${m.id})">✕</button>`;
+    item.innerHTML = '<div class="marker-dot" style="background:' + m.color + '"></div><span class="marker-name">' + m.label + '</span><span class="marker-coords">' + m.coords[0].toFixed(3) + ',' + m.coords[1].toFixed(3) + '</span><button class="marker-del" onclick="removeMarker(' + m.id + ')">✕</button>';
     list.appendChild(item);
   });
 }
@@ -543,13 +546,16 @@ function renderMarkerList() {
 function updateRouteMarkerBtns() {
   const wrap = document.getElementById('route-marker-btns');
   wrap.innerHTML = '';
-  if (!markers.length) { wrap.innerHTML = '<span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>'; return; }
+  if (!markers.length) {
+    wrap.innerHTML = '<span style="font-size:10px;color:#555;">добавь маркеры на вкладке «Маркеры»</span>';
+    return;
+  }
   markers.forEach(m => {
     const btn = document.createElement('button');
     btn.className = 'btn btn-ghost';
     btn.style.cssText = 'display:flex;align-items:center;gap:6px;text-align:left;font-size:10px;';
-    btn.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${m.color};flex-shrink:0;"></span>${m.label}<span style="color:#555;margin-left:auto;">${m.coords[0].toFixed(3)},${m.coords[1].toFixed(3)}</span>`;
-    btn.onclick = () => {
+    btn.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:' + m.color + ';flex-shrink:0;"></span>' + m.label + '<span style="color:#555;margin-left:auto;">' + m.coords[0].toFixed(3) + ',' + m.coords[1].toFixed(3) + '</span>';
+    btn.onclick = function() {
       const val = m.coords[0].toFixed(5) + ', ' + m.coords[1].toFixed(5);
       const fromEl = document.getElementById('route-from');
       const toEl = document.getElementById('route-to');
@@ -582,12 +588,12 @@ async function buildRoute() {
   clearRoute();
   log('строю маршрут (' + type + ')...', 'info');
   try {
-    const { route } = await ymaps3.route({ points: [from, to], type });
+    const { route } = await ymaps3.route({ points: [from, to], type: type });
     if (!route) { log('маршрут не найден', 'err'); return; }
     const geometry = route.toRoute().geometry;
     const colors = { pedestrian: '#5aabff', driving: '#ff6b6b', bicycle: '#5affaa' };
     routeFeature = new YMapFeatureClass({
-      geometry,
+      geometry: geometry,
       style: { stroke: [{ color: colors[type] || '#fff', width: 4 }], simplificationRate: 0 }
     });
     map.addChild(routeFeature);
@@ -596,31 +602,43 @@ async function buildRoute() {
     if (props.duration) info += '  ·  ' + Math.round(props.duration / 60) + ' мин';
     if (props.distance) info += '  ·  ' + (props.distance / 1000).toFixed(1) + ' км';
     const infoEl = document.getElementById('route-info');
-    infoEl.textContent = info; infoEl.className = 'route-info visible';
+    infoEl.textContent = info;
+    infoEl.className = 'route-info visible';
     log('готово', 'ok');
-  } catch(e) { log('ошибка: ' + e.message, 'err'); }
+  } catch(e) {
+    log('ошибка: ' + e.message, 'err');
+  }
 }
 
 function clearRoute() {
-  if (routeFeature && map) { try { map.removeChild(routeFeature); } catch(e){} routeFeature = null; }
+  if (routeFeature && map) {
+    try { map.removeChild(routeFeature); } catch(e) {}
+    routeFeature = null;
+  }
   document.getElementById('route-info').className = 'route-info';
 }
 
 // ---- 3D / КАМЕРА ----
-let camState = { tilt: 0, bearing: 0 };   // углы в градусах (в UI)
-let pre3DZoom = null;                     // зум, который был до первого наклона
+let camState = { tilt: 0, bearing: 0 };
+let pre3DZoom = null;
 
-const DEG = Math.PI / 180;                // v3 принимает углы камеры в радианах
-const MIN_3D_ZOOM = 16.5;                 // с этого зума здания рисуются объёмными
+const DEG = Math.PI / 180;
+const MIN_3D_ZOOM = 16.5;
 
-// обёртка: в свежих версиях v3 — setCamera, в ранних сборках то же делает setLocation
+function cam() {
+  return map.camera || {};
+}
+
 function setCam(p) {
   if (!map) return;
-  if (typeof map.setCamera === 'function') map.setCamera(p);
-  else if (typeof map.setLocation === 'function') map.setLocation(p);
-  else map.update({ location: p });
+  if (typeof map.setCamera === 'function') {
+    map.setCamera(p);
+  } else if (typeof map.setLocation === 'function') {
+    map.setLocation(p);
+  } else {
+    map.update({ location: p });
+  }
 }
-const cam = () => map.camera || {};
 
 function syncCamUI() {
   document.getElementById('tilt-slider').value = Math.round(camState.tilt);
@@ -634,11 +652,9 @@ function onTiltSlide(val) {
   if (!map) return;
   const deg = parseInt(val, 10);
   if (deg > 0 && camState.tilt === 0 && (cam().zoom || 12) < MIN_3D_ZOOM) {
-    // первый наклон при мелком зуме — дотягиваем зум, чтобы здания были видны в объёме
     pre3DZoom = cam().zoom || 12;
     setCam({ tilt: deg * DEG, zoom: MIN_3D_ZOOM });
   } else if (deg === 0 && camState.tilt > 0 && pre3DZoom) {
-    // вернули наклон в 0 — возвращаем прежний зум
     setCam({ tilt: 0, zoom: pre3DZoom });
     pre3DZoom = null;
   } else {
@@ -659,15 +675,19 @@ function toggle3D() {
   if (!map) { log('карта ещё не готова', 'warn'); return; }
   if (camState.tilt > 0) {
     camState.tilt = 0;
-    if (pre3DZoom) { setCam({ tilt: 0, zoom: pre3DZoom, duration: 700 }); pre3DZoom = null; }
-    else setCam({ tilt: 0, duration: 700 });
+    if (pre3DZoom) {
+      setCam({ tilt: 0, zoom: pre3DZoom, duration: 700 });
+      pre3DZoom = null;
+    } else {
+      setCam({ tilt: 0, duration: 700 });
+    }
     log('3D выкл', 'info');
   } else {
     camState.tilt = 60;
     const z = cam().zoom || 12;
     if (z < MIN_3D_ZOOM) pre3DZoom = z;
     const zoom = Math.max(z, MIN_3D_ZOOM);
-    setCam({ tilt: 60 * DEG, zoom, duration: 700 });
+    setCam({ tilt: 60 * DEG, zoom: zoom, duration: 700 });
     log('3D вкл · наклон 60° · зум ' + zoom.toFixed(1), 'info');
   }
   syncCamUI();
@@ -675,23 +695,41 @@ function toggle3D() {
 
 function resetView() {
   if (!map) { log('карта ещё не готова', 'warn'); return; }
-  camState = { tilt: 0, bearing: 0 };
+  camState.tilt = 0;
+  camState.bearing = 0;
   pre3DZoom = null;
   setCam({ center: [37.6176, 55.7558], zoom: 12, tilt: 0, bearing: 0, duration: 700 });
   syncCamUI();
   log('камера сброшена');
 }
 
+// лог значений ползунков — при отпускании (change), чтобы не спамить на каждый input
+document.getElementById('tilt-slider').addEventListener('change', function(e) {
+  log('наклон → ' + e.target.value + '°', 'info');
+});
+document.getElementById('bearing-slider').addEventListener('change', function(e) {
+  log('поворот → ' + e.target.value + '°', 'info');
+});
+
 // ---- ТАБЫ ----
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['style','markers','route'][i] === name));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  document.querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.toggle('active', ['style','markers','route'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'panel-' + name);
+  });
 }
 
 // ---- СТАРТ ----
 window.addEventListener('load', function() {
-  if (typeof ymaps3 === 'undefined') { log('ymaps3 не загрузился — проверь ключ и HTTP Referer в кабинете Яндекса', 'err'); return; }
-  ymaps3.ready.then(initMap).catch(e => log('ready error: ' + e.message, 'err'));
+  if (typeof ymaps3 === 'undefined') {
+    log('ymaps3 не загрузился — проверь ключ и HTTP Referer в кабинете Яндекса', 'err');
+    return;
+  }
+  ymaps3.ready.then(initMap).catch(function(e) {
+    log('ready error: ' + e.message, 'err');
+  });
 });
 </script>
 </body>
