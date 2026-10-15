@@ -458,7 +458,7 @@ function applyStyles() {
 
 function setTheme(t) { currentTheme = t; applyStyles(); log('тема → ' + t, 'info'); }
 function allOn()  { document.querySelectorAll('[data-tag]').forEach(i => i.checked = true);  applyStyles(); }
-function allOff() { document.querySelectorAll('[data-tag]').forEach(i => i.checked = false; applyStyles(); }
+function allOff() { document.querySelectorAll('[data-tag]').forEach(i => i.checked = false);  applyStyles(); }
 
 function exportStyles() {
   const json = JSON.stringify(buildCustomization(), null, 2);
