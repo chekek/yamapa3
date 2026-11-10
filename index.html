@@ -264,7 +264,6 @@ select.field-input { cursor: pointer; }
     <!-- СТРОЕНИЯ -->
     <div class="group-header">🏙 Строения</div>
     <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Здания</div><div class="toggle-sub">building</div></div><label class="toggle"><input type="checkbox" data-tag="building" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">3D-модели зданий</div><div class="toggle-sub">structure</div></div><label class="toggle"><input type="checkbox" data-tag="structure" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Входы в здания</div><div class="toggle-sub">building › entrance</div></div><label class="toggle"><input type="checkbox" data-tag="entrance" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Заборы</div><div class="toggle-sub">fence</div></div><label class="toggle"><input type="checkbox" data-tag="fence" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
 
@@ -276,7 +275,6 @@ select.field-input { cursor: pointer; }
     <div class="toggle-row"><div class="toggle-info"><div class="toggle-label">Ландшафт (всё)</div><div class="toggle-sub">landscape</div></div><label class="toggle"><input type="checkbox" data-tag="landscape" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Земная поверхность</div><div class="toggle-sub">land</div></div><label class="toggle"><input type="checkbox" data-tag="land" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Растительность / зелень</div><div class="toggle-sub">vegetation</div></div><label class="toggle"><input type="checkbox" data-tag="vegetation" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
-    <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">3D-деревья</div><div class="toggle-sub">tree</div></div><label class="toggle"><input type="checkbox" data-tag="tree" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Подписи территорий</div><div class="toggle-sub">landscape · только label</div></div><label class="toggle"><input type="checkbox" data-tag="landscape" data-element="label" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Жилые кварталы</div><div class="toggle-sub">residential</div></div><label class="toggle"><input type="checkbox" data-tag="residential" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
     <div class="toggle-row sub"><div class="toggle-info"><div class="toggle-label dim">Промзоны</div><div class="toggle-sub">industrial</div></div><label class="toggle"><input type="checkbox" data-tag="industrial" checked onchange="applyStyles()"><span class="toggle-slider"></span></label></div>
@@ -443,18 +441,28 @@ async function initMap() {
 // ---- СТИЛИ ----
 function buildCustomization() {
   const styles = [];
+  // Собираем состояние: tag -> { hideAll, hideLabel }
+  // Если тег без data-element выключен — hideAll=true
+  // Если тег с data-element="label" выключен — hideLabel=true
+  const state = {};
   document.querySelectorAll('[data-tag]').forEach(input => {
+    const tag = input.dataset.tag;
+    const el = input.dataset.element || null;
+    if (!state[tag]) state[tag] = { hideAll: false, hideLabel: false };
     if (!input.checked) {
-      const tag = input.dataset.tag;
-      const el = input.dataset.element; // если задан — скрываем только этот элемент
       if (el === 'label') {
-        // только подписи — используем opacity на label
-        styles.push({ tags: { all: [tag] }, elements: 'label', stylers: [{ opacity: 0 }] });
-      } else {
-        // скрываем геометрию и подпись полностью
-        styles.push({ tags: { all: [tag] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
-        styles.push({ tags: { all: [tag] }, elements: 'label', stylers: [{ opacity: 0 }] });
+        state[tag].hideLabel = true;
+      } else if (!el) {
+        state[tag].hideAll = true;
       }
+    }
+  });
+  Object.entries(state).forEach(([tag, s]) => {
+    if (s.hideAll) {
+      styles.push({ tags: { all: [tag] }, elements: 'geometry', stylers: [{ opacity: 0 }] });
+      styles.push({ tags: { all: [tag] }, elements: 'label',    stylers: [{ opacity: 0 }] });
+    } else if (s.hideLabel) {
+      styles.push({ tags: { all: [tag] }, elements: 'label', stylers: [{ opacity: 0 }] });
     }
   });
   return styles;
